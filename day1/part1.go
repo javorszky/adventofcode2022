@@ -1,7 +1,6 @@
 package day1
 
 import (
-	"fmt"
 	"os"
 	"sort"
 	"strconv"
@@ -21,11 +20,9 @@ func Task1(l zerolog.Logger) {
 		localLogger.Err(err).Msg("could not read input file")
 		os.Exit(1)
 	}
-	fmt.Printf("%#v", gog)
 
 	gogi, err := convertToInts(gog)
 	if err != nil {
-
 		localLogger.Err(err).Msg("converting group of lines to group of ints")
 		os.Exit(1)
 	}
@@ -37,6 +34,7 @@ func Task1(l zerolog.Logger) {
 
 	sort.Ints(rolledUp)
 	solution := rolledUp[len(rolledUp)-1]
+
 	s := localLogger.With().Int("solution", solution).Logger()
 	s.Info().Msgf("The elf carrying the most calories is carrying %d", solution)
 }
