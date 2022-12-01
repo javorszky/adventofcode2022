@@ -53,3 +53,13 @@ To avoid this unacceptable situation, the Elves would instead like to know the t
 In the example above, the top three Elves are the fourth Elf (with 24000 Calories), then the third Elf (with 11000 Calories), then the fifth Elf (with 10000 Calories). The sum of the Calories carried by these three elves is 45000.
 
 Find the top three Elves carrying the most Calories. How many Calories are those Elves carrying in total?
+
+## solution
+
+It's fairly straightforward. After reading in the file and grouping the inputs together, there are two parts to it:
+
+* first part is to reduce / rollup / sum the numbers for each group of elves, this gives us the total calories a group is carrying. After this step we're left with a slice / array of calories that each group is carrying
+* then we sort that slice / array, so we have the least amount of calories in a group at the front and the most in the back
+* for part 1, we pick the last element of said slice / array
+* for part 2, we pick the last three elements of said slice / array
+  * and then run the reduce / rollup / sum on this 3 element slice again
