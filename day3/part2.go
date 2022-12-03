@@ -1,7 +1,6 @@
 package day3
 
 import (
-	"log"
 	"os"
 
 	"github.com/javorszky/adventofcode2022/inputs"
@@ -44,13 +43,14 @@ func Task2(l zerolog.Logger) {
 			for k := range cMap {
 				prio, err := convertToPriority(k)
 				if err != nil {
-					log.Fatalf("could not convert item type %s (%d) to priority: %s", string(k), k, err)
+					localLogger.Err(err).Msgf("could not convert item type %s (%d) to priority: %s", string(k), k, err)
+					os.Exit(1)
 				}
 
 				sum += prio
 			}
 		default:
-			log.Fatalf("this should never have happened... i %% 3 is not 0, 1, 2")
+			localLogger.Fatal().Msg("this should never have happened... i %% 3 is not 0, 1, 2")
 		}
 	}
 
