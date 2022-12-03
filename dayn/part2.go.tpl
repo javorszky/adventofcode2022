@@ -20,5 +20,5 @@ func Task2(l zerolog.Logger) {
 
 	solution := 2
 	s := localLogger.With().Int("solution", solution).Logger()
-	s.Info().Msgf("The elf carrying the most calories is carrying %d", solution)
+	s.Info().Msgf("-- change this to the part 2 message -- %d", solution)
 }
