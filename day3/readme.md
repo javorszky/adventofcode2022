@@ -45,6 +45,63 @@ Find the item type that appears in both compartments of each rucksack. What is t
 
 ### Solution
 
+* create a variable with initial value 0 that keeps track of the misplaced item priorities
+* then for each line
+  * break the line into two equal parts
+  * map the characters of the first half into a `map[int32]struct{}`, so I have a record of which characters are present. I don't care how many of them there are
+  * iterate over each character of the second line, and check with the map whether that char exists in the first half. If so, add the codepoint, an `int32` to an array
+  * compact that array, ie remove the duplicates
+  * create another mapping that takes the codepoints of the letters and gets the priority for them
+  * add the priority to the sum
+* return the sum as the solution
+
 ## Part 2
 
+--- Part Two ---
+
+---
+
+As you finish identifying the misplaced items, the Elves come to you with another issue.
+
+For safety, the Elves are divided into groups of three. Every Elf carries a badge that identifies their group. For efficiency, within each group of three Elves, the badge is the only item type carried by all three Elves. That is, if a group's badge is item type B, then all three Elves will have item type B somewhere in their rucksack, and at most two of the Elves will be carrying any other item type.
+
+The problem is that someone forgot to put this year's updated authenticity sticker on the badges. All of the badges need to be pulled out of the rucksacks so the new authenticity stickers can be attached.
+
+Additionally, nobody wrote down which item type corresponds to each group's badges. The only way to tell which item type is the right one is by finding the one item type that is common between all three Elves in each group.
+
+Every set of three lines in your list corresponds to a single group, but each group can have a different badge item type. So, in the above example, the first group's rucksacks are the first three lines:
+
+```
+vJrwpWtwJgWrhcsFMMfFFhFp
+jqHRNqRjqzjGDLGLrsFMfFZSrLrFZsSL
+PmmdzqPrVvPwwTWBwg
+```
+
+And the second group's rucksacks are the next three lines:
+
+```
+wMqvLMZHhHMvwLHjbvcjnnSBnvTQFn
+ttgJtRGJQctTZtZT
+CrZsJsPPZsGzwwsLwLmpwMDw
+```
+
+In the first group, the only item type that appears in all three rucksacks is lowercase r; this must be their badges. In the second group, their badge item type must be Z.
+
+Priorities for these items must still be found to organize the sticker attachment efforts: here, they are 18 (r) for the first group and 52 (Z) for the second group. The sum of these is 70.
+
+Find the item type that corresponds to the badges of each three-Elf group. What is the sum of the priorities of those item types?
+
 ### Solution
+
+* create a variable with initial value 0
+* for each line
+  * check the index of the line
+    * if it's the first line (modulo of 3 = 0)
+      * create a map A with each character in it for the first line
+    * if it's the second line (modulo of 3 = 1)
+      * create a new map B by comparing this line to the map A with the common characters
+    * third line, last of the group (modulo of 3 = 2)
+      * create a slice of common characters between map B and this line
+      * that slice will only have codepoints for chars there are present in all three lines of the group
+      * compact the slice, remove duplicates, convert to priority, add to sum
+* return sum with the solution
