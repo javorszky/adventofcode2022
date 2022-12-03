@@ -7,6 +7,7 @@ import (
 	"fmt"
 
 	"github.com/javorszky/adventofcode2022/day1"
+	"github.com/javorszky/adventofcode2022/day2"
 	"github.com/rs/zerolog"
 	"github.com/spf13/cobra"
 )
@@ -29,6 +30,7 @@ to quickly create a Cobra application.`,
 
 		day1.Task1(l)
 		day1.Task2(l)
+		day2.Task1(l)
 	},
 }
 
