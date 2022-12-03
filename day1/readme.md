@@ -1,6 +1,6 @@
 # day 1
 
-[back to index](../)
+[back to index](https://github.com/javorszky/adventofcode2022/)
 
 ## part 1
 
