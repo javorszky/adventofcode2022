@@ -126,6 +126,8 @@ $ aoc22 generate 9 --day 14
 		if err != nil {
 			log.Fatalf("Executing template for 'readme.md' failed: %s", err)
 		}
+
+		log.Printf("Folder for %s generated, all good!", dirName)
 	},
 }
 
