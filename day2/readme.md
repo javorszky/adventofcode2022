@@ -1,5 +1,7 @@
 # Day 2
 
+[back to index](/)
+
 ## Part 1
 
 --- Day 2: Rock Paper Scissors ---

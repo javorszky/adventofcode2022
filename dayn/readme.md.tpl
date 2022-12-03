@@ -1,5 +1,7 @@
 # Day {{ .Day }}
 
+[back to index](/)
+
 ## Part 1
 
 ### Solution
