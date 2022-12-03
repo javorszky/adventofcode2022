@@ -1,5 +1,12 @@
 package {{ .Pkg }}
 
+import (
+	"os"
+
+	"github.com/javorszky/adventofcode2022/inputs"
+	"github.com/rs/zerolog"
+)
+
 func Task1(l zerolog.Logger) {
 	localLogger := l.With().Int("day", {{ .Day }}).Int("part", 1).Logger()
 
