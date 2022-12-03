@@ -5,11 +5,11 @@ package cmd
 
 import (
 	"fmt"
-	"html/template"
 	"io/fs"
 	"log"
 	"os"
 	"strconv"
+	"text/template"
 	"time"
 
 	"github.com/pkg/errors"
