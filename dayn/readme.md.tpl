@@ -1,6 +1,6 @@
 # Day {{ .Day }}
 
-[back to index](/)
+[back to index](https://github.com/javorszky/adventofcode2022/)
 
 ## Part 1
 

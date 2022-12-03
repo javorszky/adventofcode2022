@@ -1,6 +1,6 @@
 # day 1
 
-[back to index](/)
+[back to index](../)
 
 ## part 1
 
