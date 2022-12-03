@@ -31,6 +31,7 @@ to quickly create a Cobra application.`,
 		day1.Task1(l)
 		day1.Task2(l)
 		day2.Task1(l)
+		day2.Task2(l)
 	},
 }
 
