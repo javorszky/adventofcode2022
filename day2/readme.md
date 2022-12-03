@@ -33,6 +33,8 @@ What would your total score be if everything goes exactly according to your stra
 
 ### Solution
 
+There are 9 possibilities the game could end up. I chuck them in a map, manually calculate the score for each outcome, then iterate over the lines of the input, match the line to my lookup table, and increment a variable by the corresponding score to get a final one.
+
 ## Part 2
 
 --- Part Two ---
@@ -48,3 +50,5 @@ Now that you're correctly decrypting the ultra top secret strategy guide, you wo
 Following the Elf's instructions for the second column, what would your total score be if everything goes exactly according to your strategy guide?
 
 ### Solution
+
+Same as above, but the LUT changed.
