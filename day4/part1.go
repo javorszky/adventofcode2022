@@ -37,13 +37,13 @@ func Task1(l zerolog.Logger) {
 	s.Info().Msgf("There are %d pairs where one fully contains the other's assignment", solution)
 }
 
-func fullyContains(one string) (int, error) {
+func startEndMaps(in string) (map[int]struct{}, map[int]struct{}, error) {
 	// split the line into the two groups
 	//
 	// 1-2,3-4 => 1,2 and 3,4
-	pairs := strings.Split(one, ",")
+	pairs := strings.Split(in, ",")
 	if len(pairs) != 2 {
-		return 0, errors.New("splitting line by comma yielded unexpected number of parts")
+		return nil, nil, errors.New("splitting line by comma yielded unexpected number of parts")
 	}
 
 	// split the first group into beginning and end numbers
@@ -51,16 +51,16 @@ func fullyContains(one string) (int, error) {
 	// 1-2 => 1 and 2
 	first := strings.Split(pairs[0], "-")
 	if len(first) != 2 {
-		return 0, errors.New("splitting first elf assignment by dash yielded unexpected number of parts")
+		return nil, nil, errors.New("splitting first elf assignment by dash yielded unexpected number of parts")
 	}
 
 	f1, err := strconv.Atoi(first[0])
 	if err != nil {
-		return 0, errors.Wrap(err, "converting starting schedule for first elf")
+		return nil, nil, errors.Wrap(err, "converting starting schedule for first elf")
 	}
 	f2, err := strconv.Atoi(first[1])
 	if err != nil {
-		return 0, errors.Wrap(err, "converting ending schedule for first elf")
+		return nil, nil, errors.Wrap(err, "converting ending schedule for first elf")
 	}
 
 	// split the second group into beginning and end numbers
@@ -68,16 +68,16 @@ func fullyContains(one string) (int, error) {
 	// 3-4 => 3 and 4
 	second := strings.Split(pairs[1], "-")
 	if len(second) != 2 {
-		return 0, errors.New("splitting second elf assignment by dash yielded unexpected number of parts")
+		return nil, nil, errors.New("splitting second elf assignment by dash yielded unexpected number of parts")
 	}
 
 	s1, err := strconv.Atoi(second[0])
 	if err != nil {
-		return 0, errors.Wrap(err, "converting starting schedule for second elf")
+		return nil, nil, errors.Wrap(err, "converting starting schedule for second elf")
 	}
 	s2, err := strconv.Atoi(second[1])
 	if err != nil {
-		return 0, errors.Wrap(err, "converting ending schedule for second elf")
+		return nil, nil, errors.Wrap(err, "converting ending schedule for second elf")
 	}
 
 	// create maps to keep track of overlaps
@@ -97,6 +97,15 @@ func fullyContains(one string) (int, error) {
 
 	for i := s1; i <= s2; i++ {
 		mapSecond[i] = struct{}{}
+	}
+
+	return mapFirst, mapSecond, nil
+}
+
+func fullyContains(one string) (int, error) {
+	mapFirst, mapSecond, err := startEndMaps(one)
+	if err != nil {
+		return 0, errors.Wrapf(err, "startEndMaps for %s failed", one)
 	}
 
 	// find the map that's longer. If we're fully enclosing then the longer one needs to fully contain the shorter one.

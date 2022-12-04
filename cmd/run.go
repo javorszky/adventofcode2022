@@ -29,6 +29,7 @@ to quickly create a Cobra application.`,
 		//day3.Task1(l)
 
 		day4.Task1(l)
+		day4.Task2(l)
 	},
 }
 
