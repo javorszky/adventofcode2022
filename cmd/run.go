@@ -1,7 +1,7 @@
 package cmd
 
 import (
-	"github.com/javorszky/adventofcode2022/day3"
+	"github.com/javorszky/adventofcode2022/day4"
 
 	"github.com/rs/zerolog"
 	"github.com/spf13/cobra"
@@ -25,8 +25,10 @@ to quickly create a Cobra application.`,
 		//day1.Task2(l)
 		//day2.Task1(l)
 		//day2.Task2(l)
-		day3.Task1(l)
-		day3.Task2(l)
+		//day3.Task2(l)
+		//day3.Task1(l)
+
+		day4.Task1(l)
 	},
 }
 
