@@ -4,3 +4,4 @@
 * [day 2](day2) - efficient map lookup and hardcoding the few possibilities
 * [day 3](day3) - codepoints, maps, common values
 * [day 4](day4) - ranges -> maps, merge, length checks
+* [day 5](day5) - slice manipulation, FILO queue, push and pop implementation 
