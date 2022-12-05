@@ -74,6 +74,15 @@ After the rearrangement procedure completes, what crate ends up on top of each s
 
 ### Solution
 
+This is also an array manipulation exercise.
+
+* set up a new struct that holds a slice of strings. This is going to be our stack of boxes. Element [0] is on the bottom, the last element is on top
+* set up push and pop methods on it, so we can add a single box to the end, or remove a single box from the end and return it
+* parse the instructions into an array of three numbers: how many, from where to where
+* set up our "warehouse", which is 9 stacks of boxes. This is a map with keys 1-9 which makes working with instructions easier
+* for each line of the instruction, do a for loop n times where n is the first element in the 3 long array, and pop from source stack and push to destination stack
+* create a string builder, iterate over the warehouse and grab the last box and put its label into the string for our solution
+
 ## Part 2
 
 As you watch the crane operator expertly rearrange the crates, you notice the process isn't following your prediction.
@@ -130,3 +139,7 @@ In this example, the CrateMover 9001 has put the crates in a totally different o
 Before the rearrangement process finishes, update your simulation so that the Elves know where they should stand to be ready to unload the final supplies. After the rearrangement procedure completes, what crate ends up on top of each stack?
 
 ### Solution
+
+The exact same thing as above with the minor change that we're not moving a single item, but many items. Reason this is still easy is because in go adding and removing a single item is much the same as adding / removing another slice of 1 length, so changing the length of the other slice is very very easy.
+
+I added some more error checking.
