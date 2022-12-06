@@ -38,6 +38,17 @@ How many characters need to be processed before the first start-of-packet marker
 
 ### Solution
 
+I get to use readers!
+
+* put the input string into a reader
+* start at offset 0
+* read 4 bytes that gives me a byte slice (slice (array) of uint8 numbers)
+* sort that slice, does not matter which direction
+* compact the slice (remove duplicates)
+* compare the size of the sorted-but-not-compacted and compacted slices
+* if it's the same, all characters are unique
+* return the offset + 4 because the offset is the starting character, and the task is asking for the next character to arrive
+
 ## Part 2
 
 Your device's communication system is correctly detecting packets, but still isn't working. It looks like it also needs to look for messages.
@@ -54,3 +65,8 @@ Here are the first positions of start-of-message markers for all of the above ex
 How many characters need to be processed before the first start-of-message marker is detected?
 
 ### Solution
+
+Exactly the same as above except:
+
+* read 14 bytes
+* if compacted and original length are the same, return offset + 14

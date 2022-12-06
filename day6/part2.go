@@ -29,5 +29,5 @@ func Task2(l zerolog.Logger) {
 
 	solution := messageMarker
 	s := localLogger.With().Int("solution", solution).Logger()
-	s.Info().Msgf("-- change this to the part 2 message -- %d", solution)
+	s.Info().Msgf("First message marker arrives when character %d comes in", solution)
 }
