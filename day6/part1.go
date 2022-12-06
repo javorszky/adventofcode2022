@@ -10,6 +10,8 @@ import (
 	"golang.org/x/exp/slices"
 )
 
+const startOfPacketLength = 4
+
 func Task1(l zerolog.Logger) {
 	localLogger := l.With().Int("day", 6).Int("part", 1).Logger()
 
@@ -21,22 +23,22 @@ func Task1(l zerolog.Logger) {
 
 	stream := gog[0]
 
-	bla, err := extractMarker(stream)
+	startOfPacket, err := extractMarker(stream, startOfPacketLength)
 	if err != nil {
 		localLogger.Err(err).Msgf("extracting marker failed")
 		os.Exit(1)
 	}
 	// code goes here
 
-	solution := bla
+	solution := startOfPacket
 	s := localLogger.With().Int("solution", solution).Logger()
 	s.Info().Msgf("Offset for the first unique 4 char sequence is %d", solution)
 }
 
-func extractMarker(in string) (int, error) {
+func extractMarker(in string, n int) (int, error) {
 	sbuf := strings.NewReader(in)
 
-	marker := make([]byte, 4)
+	marker := make([]byte, n)
 	var off int64 = 0
 	for {
 		at, err := sbuf.ReadAt(marker, off)
@@ -49,7 +51,7 @@ func extractMarker(in string) (int, error) {
 		})
 		compactedMarker := slices.Compact(marker)
 		if len(marker) == len(compactedMarker) {
-			return int(off) + 4, nil
+			return int(off) + n, nil
 		}
 
 		off++
