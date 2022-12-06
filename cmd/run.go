@@ -9,6 +9,7 @@ import (
 	"github.com/javorszky/adventofcode2022/day3"
 	"github.com/javorszky/adventofcode2022/day4"
 	"github.com/javorszky/adventofcode2022/day5"
+	"github.com/javorszky/adventofcode2022/day6"
 	"github.com/pkg/errors"
 
 	"github.com/rs/zerolog"
@@ -35,6 +36,7 @@ to quickly create a Cobra application.`,
 			3: {day3.Task1, day3.Task2},
 			4: {day4.Task1, day4.Task2},
 			5: {day5.Task1, day5.Task2},
+			6: {day6.Task1, nil},
 		}
 
 		lenT := len(tasks)
