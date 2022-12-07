@@ -91,6 +91,29 @@ Find all of the directories with a total size of at most 100000. What is the sum
 
 ### Solution
 
+Fairly straightforward. The moment you identify a thing that can contain the same thing within itself, think tree. Binary tree, linked list, whatever.
+
+In this case the thing is a directory. A directory has a name, a map of directories it contains, and a map of files it contains. The map of directories is a list of pointers to other directories (nodes), and the files are `map[string]int` - string for their name, int for their size.
+
+Then I implemented a bunch of methods on the directory node type:
+* addDir with a name which initializes a new directory and stores the pointer to that in the map of the current directory
+* addFile with a name and size which adds the entry to the files map
+* cd into directory with name, which will look at the map of directories, and return the pointer to the dir where the name is the key in the map
+* cd up which returns the parent directory (error if parent is nil)
+* size, which calculates the sum of sizes of files, and recursively calculates the sizes of all directories too
+
+Then the only thing left is command parsing:
+* start with a root directory where the parent is nil, name is "/", and assign that to a currentDir variable
+* for each line of the input
+  * check if it's a cd command, in which case use the corresponding method on the currentDir
+  * if it's an `ls`, do nothing
+  * if it's a dir something, create a new directory on the current directory
+  * if it's a number / name, create a new file on the current directory
+
+Once we have the full tree, time to filter the dirs for the sizes. That one is done with a recursive filter directory where a slice holds pointers to directories where the size is at most 100,000.
+
+Once we have that slice, we can loop over them, and sum up the sizes.
+
 ## Part 2
 
 Now, you're ready to choose a directory to delete.
@@ -111,3 +134,9 @@ Directories e and a are both too small; deleting them would not free up enough s
 Find the smallest directory that, if deleted, would free up enough space on the filesystem to run the update. What is the total size of that directory?
 
 ### Solution
+
+Same as above, except needed a tiny math setup to figure out what's the minimum space we need to free up. For that we need the size of the root directory.
+
+Then had to make a copy of the "at most" filter from part 1 to be at least minimum size, which gave me a list of directories with at least that much size.
+
+Then I sorted the slice with a custom function which compared the sizes of each element in ascending order, and then grabbed the first element which is the smallest sized directory at least the size we need.

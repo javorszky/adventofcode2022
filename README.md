@@ -6,3 +6,4 @@
 * [day 4](day4) - ranges -> maps, merge, length checks
 * [day 5](day5) - slice manipulation, FILO queue, push and pop implementation 
 * [day 6](day6) - byte readers and limited readers and offsets and array uniqueness
+* [day 7](day7) - recursive tree
