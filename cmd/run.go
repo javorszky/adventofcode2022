@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"strconv"
 
+	"github.com/javorszky/adventofcode2022/day7"
+
 	"github.com/javorszky/adventofcode2022/day1"
 	"github.com/javorszky/adventofcode2022/day2"
 	"github.com/javorszky/adventofcode2022/day3"
@@ -37,6 +39,7 @@ to quickly create a Cobra application.`,
 			4: {day4.Task1, day4.Task2},
 			5: {day5.Task1, day5.Task2},
 			6: {day6.Task1, day6.Task2},
+			7: {day7.Task1, day7.Task2},
 		}
 
 		lenT := len(tasks)
