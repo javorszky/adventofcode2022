@@ -1,8 +1,8 @@
-# day 1
+# Day 1: Calorie Counting
 
 [back to index](https://github.com/javorszky/adventofcode2022/)
 
-## part 1
+## Part 1
 
 Santa's reindeer typically eat regular reindeer food, but they need a lot of magical energy to deliver presents on Christmas. For that, their favorite snack is a special type of star fruit that only grows deep in the jungle. The Elves have brought you on their annual expedition to the grove where the fruit grows.
 
@@ -44,9 +44,15 @@ In case the Elves get hungry and need extra snacks, they need to know which Elf 
 
 Find the Elf carrying the most Calories. How many total Calories is that Elf carrying?
 
-To play, please identify yourself via one of these services:
+### Solution
 
-## part 2
+It's fairly straightforward. After reading in the file and grouping the inputs together, there are two parts to it:
+
+* first part is to reduce / rollup / sum the numbers for each group of elves, this gives us the total calories a group is carrying. After this step we're left with a slice / array of calories that each group is carrying
+* then we sort that slice / array, so we have the least amount of calories in a group at the front and the most in the back
+* for part 1, we pick the last element of said slice / array
+
+## Part 2
 
 By the time you calculate the answer to the Elves' question, they've already realized that the Elf carrying the most Calories of food might eventually run out of snacks.
 
@@ -56,12 +62,5 @@ In the example above, the top three Elves are the fourth Elf (with 24000 Calorie
 
 Find the top three Elves carrying the most Calories. How many Calories are those Elves carrying in total?
 
-## solution
-
-It's fairly straightforward. After reading in the file and grouping the inputs together, there are two parts to it:
-
-* first part is to reduce / rollup / sum the numbers for each group of elves, this gives us the total calories a group is carrying. After this step we're left with a slice / array of calories that each group is carrying
-* then we sort that slice / array, so we have the least amount of calories in a group at the front and the most in the back
-* for part 1, we pick the last element of said slice / array
-* for part 2, we pick the last three elements of said slice / array
-  * and then run the reduce / rollup / sum on this 3 element slice again
+### Solution
+Same as part 1, but we pick the last three elements of said slice / array, and then run the reduce / rollup / sum on this 3 element slice again

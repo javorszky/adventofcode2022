@@ -1,12 +1,8 @@
-# Day 4
+# Day 4: Camp Cleanup
 
 [back to index](https://github.com/javorszky/adventofcode2022/)
 
 ## Part 1
-
---- Day 4: Camp Cleanup ---
-
----
 
 Space needs to be cleared before the last supplies can be unloaded from the ships, and so several Elves have been assigned the job of cleaning up sections of the camp. Every section has a unique ID number, and each Elf is assigned a range of section IDs.
 
@@ -69,10 +65,6 @@ In how many assignment pairs does one range fully contain the other?
 * if the merged length is the same as the length of the longer, one fully contains the other
 
 ## Part 2
-
---- Part Two ---
-
----
 
 It seems like there is still quite a bit of duplicate work planned. Instead, the Elves would like to know the number of pairs that overlap at all.
 

@@ -1,12 +1,8 @@
-# Day 3
+# Day 3: Rucksack Reorganization
 
 [back to index](https://github.com/javorszky/adventofcode2022/)
 
 ## Part 1
-
---- Day 3: Rucksack Reorganization ---
-
----
 
 One Elf has the important job of loading all of the rucksacks with supplies for the jungle journey. Unfortunately, that Elf didn't quite follow the packing instructions, and so a few items now need to be rearranged.
 
@@ -56,10 +52,6 @@ Find the item type that appears in both compartments of each rucksack. What is t
 * return the sum as the solution
 
 ## Part 2
-
---- Part Two ---
-
----
 
 As you finish identifying the misplaced items, the Elves come to you with another issue.
 

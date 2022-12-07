@@ -32,7 +32,7 @@ func Task2(l zerolog.Logger) {
 
 	solution := pairs
 	s := localLogger.With().Int("solution", solution).Logger()
-	s.Info().Msgf("There are %d paris that have some overlap.", solution)
+	s.Info().Msgf("There are %d pairs that have some overlap.", solution)
 }
 
 func overlaps(in string) (int, error) {
