@@ -7,6 +7,7 @@ require (
 	github.com/rs/zerolog v1.28.0
 	github.com/spf13/cobra v1.6.1
 	golang.org/x/exp v0.0.0-20221126150942-6ab00d035af9
+	golang.org/x/text v0.5.0
 )
 
 require (

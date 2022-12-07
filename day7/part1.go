@@ -10,6 +10,8 @@ import (
 	"github.com/rs/zerolog"
 )
 
+const atMostSize = 100000
+
 func Task1(l zerolog.Logger) {
 	localLogger := l.With().Int("day", 7).Int("part", 1).Logger()
 
@@ -21,7 +23,7 @@ func Task1(l zerolog.Logger) {
 
 	root := buildDirectory(gog, localLogger)
 	//100,000
-	dirsAtMost100k := filterDirsAtMost100k(root)
+	dirsAtMost100k := filterDirsAtMost(root, atMostSize)
 	sumSize := 0
 
 	for _, d100k := range dirsAtMost100k {
@@ -96,7 +98,7 @@ func buildDirectory(commands []string, log zerolog.Logger) *directory {
 	return root
 }
 
-func filterDirsAtMost100k(root *directory) []*directory {
+func filterDirsAtMost(root *directory, atMost int) []*directory {
 	out := make([]*directory, 0)
 
 	var getSize func(d *directory)
@@ -104,7 +106,28 @@ func filterDirsAtMost100k(root *directory) []*directory {
 	getSize = func(d *directory) {
 		for _, dir := range d.directories {
 			dirSize := dir.size()
-			if dirSize <= 100000 {
+			if dirSize <= atMost {
+				out = append(out, dir)
+			}
+
+			getSize(dir)
+		}
+	}
+
+	getSize(root)
+
+	return out
+}
+
+func filterDirsAtLeast(root *directory, atLeast int) []*directory {
+	out := make([]*directory, 0)
+
+	var getSize func(d *directory)
+
+	getSize = func(d *directory) {
+		for _, dir := range d.directories {
+			dirSize := dir.size()
+			if dirSize >= atLeast {
 				out = append(out, dir)
 			}
 
