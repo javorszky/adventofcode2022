@@ -1,6 +1,7 @@
 package day8
 
 import (
+	"sort"
 	"strconv"
 
 	"github.com/pkg/errors"
@@ -178,6 +179,67 @@ func (f forest) countVisible() int {
 	}
 
 	return len(visible)
+}
+
+func (f forest) mostScenic() int {
+	scores := make([]int, (f.sizeX-2)*(f.sizeY-2))
+	i := 0
+	// HELL YEAH CPU GO BRRRR
+	for row := 1; row < f.sizeY-1; row++ {
+		for col := 1; col < f.sizeX-1; col++ {
+			scores[i] = f.scenicScore(row, col)
+			i++
+		}
+	}
+
+	sort.Ints(scores)
+
+	return scores[len(scores)-1]
+}
+
+func (f forest) scenicScore(row, col int) int {
+	h := f.trees[row][col]
+	dirs := [4][2]int{
+		{-1, 0}, // row -1, col same => up
+		{0, -1}, // row same, col -1 => left
+		{1, 0},  // row +1, col same => down
+		{0, 1},  // row same, col +1 => right
+	}
+	visible := [4]int{}
+
+	f.l.Debug().Msg("")
+	f.l.Debug().Msgf("Calc for [%d, %d]: %d", row, col, h)
+
+	for i, d := range dirs {
+		f.l.Debug().Msgf("Direction %#v", d)
+		row_, col_ := row, col
+		dv := 0
+		for {
+			// advance the check coords by current direction
+			row_, col_ = row_+d[0], col_+d[1]
+			h_, ok := f.trees[row_][col_]
+			if !ok {
+				f.l.Debug().Msg("edge")
+				break
+			}
+			dv++
+			f.l.Debug().Msgf("-- %d - %d", h_, h)
+			if h_ >= h {
+				f.l.Debug().Msgf("big")
+				break
+			}
+		}
+		f.l.Debug().Msgf("seen %d for dir %v", dv, d)
+		visible[i] = dv
+	}
+	product := 1
+	for _, n := range visible {
+		product = product * n
+	}
+
+	f.l.Debug().Msgf("product is %d for visibles %v", product, visible)
+
+	return product
 }
 
 func coordToBinary(x, y int) uint16 {
