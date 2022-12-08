@@ -36,6 +36,21 @@ Consider your map; how many trees are visible from outside the grid?
 
 ### Solution
 
+Brute force! But basically, first part is to create a struct that holds our forest data. It has a logger for debug puroses, a `map[int]map[int]int` for a row-column-height data, and a sizeX and sizeY for the width and the height to help me figure out whether I'm on the edge.
+
+To actually calculate the visible trees:
+* have four loops to look at the forest from all 4 sides
+* set up a `map[uint16]struct{}` to keep tab of visible trees. The `uint16` is to hold the coordinate as a binary. At most it's 100x100, so each coordinate fits into 8 bits: 128 each. That means I can take the coordinate for the row, and shift it left by 8 to get a high register and low register - a single number for the row/col pair
+* for each side, take the trees in a colum as viewed from the side, and check how many trees are visible
+  * looking from the left, each row (horizontal) is taken from left to right
+  * looking from the right, each row (horizontal) is taken from right to left
+  * looking from the top, each column (vertical) is taken from top to bottom
+  * looking from bottom, each column (vertical) isi taken from bottom to top
+* if we're on the edge, set the height of the current tree as the max and add the coordinate to the visible map
+* next up check if the height is taller than the max. If it is, set the max to the new height, record the coordinate, and move on
+* at the end the map will have an entry for all coordinates that are visible. Duplicates are taken care of because it's a map, so multiple calls to set a coordinate to be visible end up with the same thing
+* the solution is the length of the map, ie the number of entries in it
+
 ## Part 2
 
 Content with the amount of tree cover available, the Elves just need to know the best spot to build their tree house: they would like to be able to see a lot of trees.
@@ -79,3 +94,24 @@ This tree's scenic score is 8 (2 * 2 * 1 * 2); this is the ideal spot for the tr
 Consider each tree on your map. What is the highest scenic score possible for any tree?
 
 ### Solution
+
+CPU go Brrrrrrrr
+
+* for each tree in the forest that are not on the edge
+  * for each direction expressed as a unit vector
+    * for each step
+      * advance a pointer from coordinates of the tree by the unit vector
+      * check whether there's a tree there
+        * if there isn't, it's an edge. Break the loop and don't count it
+      * count the tree
+      * check whether the tree is taller or same height
+        * if it is, break the loop
+      * advance to next tree
+    * store the count in an array for that direction
+  * calculate the product from the array and return
+* scenic scores are in a slice because we don't care _which_ tree it belongs to
+* then sort the slice as ints (ascending)
+* grab the last one
+* that is the solution
+
+This ran surprisingly quickly.
