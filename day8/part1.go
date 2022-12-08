@@ -16,9 +16,12 @@ func Task1(l zerolog.Logger) {
 		os.Exit(1)
 	}
 
-	// code goes here
+	f, err := newForest(gog, localLogger)
+	if err != nil {
+		localLogger.Err(err).Msg("trying to create a new forest")
+	}
 
-	solution := 2
+	solution := f.countVisible()
 	s := localLogger.With().Int("solution", solution).Logger()
-	s.Info().Msgf("-- change this for the part 1 message -- %d", solution)
+	s.Info().Msgf("From the edges there are a total of %d trees visible in my forest", solution)
 }

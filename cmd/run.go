@@ -4,14 +4,14 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/javorszky/adventofcode2022/day7"
-
 	"github.com/javorszky/adventofcode2022/day1"
 	"github.com/javorszky/adventofcode2022/day2"
 	"github.com/javorszky/adventofcode2022/day3"
 	"github.com/javorszky/adventofcode2022/day4"
 	"github.com/javorszky/adventofcode2022/day5"
 	"github.com/javorszky/adventofcode2022/day6"
+	"github.com/javorszky/adventofcode2022/day7"
+	"github.com/javorszky/adventofcode2022/day8"
 	"github.com/pkg/errors"
 
 	"github.com/rs/zerolog"
@@ -29,8 +29,10 @@ Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
+
 		l := zerolog.New(zerolog.NewConsoleWriter()).With().Timestamp().Str("module", "adventofcode").Int("year", 2022).Logger()
 		l.Info().Msg("Welcome to Gabor Javorszky's Advent of Code 2022 solutions!")
+		zerolog.SetGlobalLevel(zerolog.InfoLevel)
 
 		tasks := map[int][2]func(logger zerolog.Logger){
 			1: {day1.Task1, day1.Task2},
@@ -40,6 +42,7 @@ to quickly create a Cobra application.`,
 			5: {day5.Task1, day5.Task2},
 			6: {day6.Task1, day6.Task2},
 			7: {day7.Task1, day7.Task2},
+			8: {day8.Task1, day8.Task2},
 		}
 
 		lenT := len(tasks)
@@ -110,4 +113,10 @@ func parsePart(arg string) (int, error) {
 
 func init() {
 	rootCmd.AddCommand(runCmd)
+}
+
+type NoDebugLog struct{}
+
+func (n NoDebugLog) Run(_ *zerolog.Event, _ zerolog.Level, _ string) {
+	// do nothing
 }
