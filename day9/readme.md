@@ -251,6 +251,29 @@ So, there are 13 positions the tail visited at least once.
 Simulate your complete hypothetical series of motions. How many positions does the tail of the rope visit at least once?
 
 ### Solution
+Kind of convoluted. I created a struct to keep track of things. The struct has
+* `[2]int` for the current tail and head coordinates
+* `map[int]struct{}` to keep track of where the tail has been, and
+* a logger
+
+For helper functions there's one called `coordToBinary` which turns an x,y coordinate into one number by adding 512 to both (so as to not deal with negative numbers), and then shifting the x coordinate by 10 bits, and then oring them.
+
+There's another one for visualisations: those are useful for testing / debugging.
+
+And a third for parsing the commands: what does "U 5" mean?
+
+Basic logic:
+* for each line of the commands
+  * figure out the direction, and how much distance to move
+  * pass that onto the `moveHead` method on the rope
+  * depending on the direction a unit coordinate pair is selected
+  * and then a for loop happens for the distance
+    * within each loop the head is moved by the unit coordinate pair
+    * then a check happens to see whether the head-tail distance is big enough for the tail to move with it
+      * if it is, all 16 possible locations of the tail with relation to the head are considered, and depending on that, a unit coordinate is chosen
+      * the tail is moved by that coordinate pair
+      * its location is recorded in the map
+* at the end of it we read the lenght of the tail trace map, and that is our solution
 
 ## Part 2
 
@@ -689,3 +712,13 @@ Now, the tail (9) visits 36 positions (including s) at least once:
 Simulate your complete series of motions on a larger rope with ten knots. How many positions does the tail of the rope visit at least once?
 
 ### Solution
+
+Mostly the same as above, except having two separate properties for the coordinates fo the head and tail, now there's one 10-long array of coordinates.
+
+* the head is moved as above, and then it calls a `moveChain` method
+* that method will loop through all the links from the head (index 0) up until the penultimate link (the one before the tail), and pass that, and the next link, onto a `moveNext` method
+  * for each link pair it checks if the next link needs to be moved. The logic is the same as "should we move the tail" in part 1
+  * if the next link had to be moved, the unit coordinate is returned, if not, a 0,0 coordinate pair returned
+  * if at any point `moveNext` returns a 0,0 pair, we break the chain, because if chain 4 didn't move, then 5, 6, 7, 8, 9 will definitely not need to move either
+  * if the last link moves (index 9), we record the new location to the map
+* at the end we read the length of the trace map
