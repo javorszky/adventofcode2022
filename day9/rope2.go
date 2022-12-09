@@ -42,19 +42,22 @@ func newRopeTwo(l zerolog.Logger) *rope2 {
 
 func (r *rope2) moveHead(dir int, dist int) error {
 	r.l.Debug().Msgf("MOV HEAD %s %d", dirToString(dir), dist)
+	moveBy := [2]int{}
+	switch dir {
+	case up:
+		moveBy = [2]int{-1, 0}
+	case right:
+		moveBy = [2]int{0, 1}
+	case down:
+		moveBy = [2]int{1, 0}
+	case left:
+		moveBy = [2]int{0, -1}
+	default:
+		return fmt.Errorf("this should not have happened, got direction %#v", dir)
+	}
+
 	for i := 0; i < dist; i++ {
-		switch dir {
-		case up:
-			r.chain[0] = [2]int{r.chain[0][0] - 1, r.chain[0][1]}
-		case right:
-			r.chain[0] = [2]int{r.chain[0][0], r.chain[0][1] + 1}
-		case down:
-			r.chain[0] = [2]int{r.chain[0][0] + 1, r.chain[0][1]}
-		case left:
-			r.chain[0] = [2]int{r.chain[0][0], r.chain[0][1] - 1}
-		default:
-			return fmt.Errorf("this should not have happened, got direction %#v", dir)
-		}
+		r.chain[0] = [2]int{r.chain[0][0] + moveBy[0], r.chain[0][1] + moveBy[1]}
 
 		err := r.moveChain()
 		if err != nil {

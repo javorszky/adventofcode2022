@@ -50,19 +50,23 @@ func newRope(l zerolog.Logger) *rope {
 
 func (r *rope) moveHead(dir int, dist int) error {
 	r.l.Debug().Msgf("%s %d", dirToString(dir), dist)
+
+	moveBy := [2]int{}
+	switch dir {
+	case up:
+		moveBy = [2]int{-1, 0}
+	case right:
+		moveBy = [2]int{0, 1}
+	case down:
+		moveBy = [2]int{1, 0}
+	case left:
+		moveBy = [2]int{0, -1}
+	default:
+		return fmt.Errorf("this should not have happened, got direction %#v", dir)
+	}
+
 	for i := 0; i < dist; i++ {
-		switch dir {
-		case up:
-			r.head = [2]int{r.head[0] + 1, r.head[1]}
-		case right:
-			r.head = [2]int{r.head[0], r.head[1] + 1}
-		case down:
-			r.head = [2]int{r.head[0] - 1, r.head[1]}
-		case left:
-			r.head = [2]int{r.head[0], r.head[1] - 1}
-		default:
-			return fmt.Errorf("this should not have happened, got direction %#v", dir)
-		}
+		r.head = [2]int{r.head[0] + moveBy[0], r.head[1] + moveBy[1]}
 
 		err := r.moveTail()
 		if err != nil {
