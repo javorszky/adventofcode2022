@@ -21,7 +21,7 @@ func Task1(l zerolog.Logger) {
 		os.Exit(1)
 	}
 
-	r := newRope()
+	r := newRope(localLogger)
 
 	for i, l := range gog {
 		dir, dist, err := parseCommand(l)
@@ -32,18 +32,22 @@ func Task1(l zerolog.Logger) {
 		err = r.moveHead(dir, dist)
 		if err != nil {
 			localLogger.Err(err).Msgf("while moving head to %d %d per command '%s' on line %d", dir, dist, l, i)
+			os.Exit(1)
 		}
 	}
 
-	localLogger.Info().Msgf("bounds for the rope: %#v", r.bounds)
-
 	// code goes here
 
-	solution := 2
+	solutionStrong := r.placesBeenString()
+	solution := r.placesBeen()
 	s := localLogger.With().Int("solution", solution).Logger()
-	s.Info().Msgf("-- change this for the part 1 message -- %d", solution)
+	s = s.With().Int("solution string", solutionStrong).Logger()
+	s.Info().Msgf("While moving the rope, the tail has been to %d / %d places", solution, solutionStrong)
 }
 
+// parseCommand returns the command from the line. Direction, distance, error.
+//
+// "D 4" would be "down 4", which should be 2,4, nil
 func parseCommand(line string) (int, int, error) {
 	parts := strings.Split(line, " ")
 	if len(parts) != 2 {

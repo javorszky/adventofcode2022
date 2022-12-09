@@ -33,7 +33,7 @@ to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		l := zerolog.New(zerolog.NewConsoleWriter()).With().Timestamp().Str("module", "adventofcode").Int("year", 2022).Logger()
 		l.Info().Msg("Welcome to Gabor Javorszky's Advent of Code 2022 solutions!")
-		zerolog.SetGlobalLevel(zerolog.InfoLevel)
+		zerolog.SetGlobalLevel(zerolog.DebugLevel)
 
 		tasks := map[int][2]func(logger zerolog.Logger){
 			1: {day1.Task1, day1.Task2},
