@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"strconv"
 
+	"github.com/javorszky/adventofcode2022/day10"
+
 	"github.com/javorszky/adventofcode2022/day9"
 
 	"github.com/javorszky/adventofcode2022/day1"
@@ -36,15 +38,16 @@ to quickly create a Cobra application.`,
 		zerolog.SetGlobalLevel(zerolog.InfoLevel)
 
 		tasks := map[int][2]func(logger zerolog.Logger){
-			1: {day1.Task1, day1.Task2},
-			2: {day2.Task1, day2.Task2},
-			3: {day3.Task1, day3.Task2},
-			4: {day4.Task1, day4.Task2},
-			5: {day5.Task1, day5.Task2},
-			6: {day6.Task1, day6.Task2},
-			7: {day7.Task1, day7.Task2},
-			8: {day8.Task1, day8.Task2},
-			9: {day9.Task1, day9.Task2},
+			1:  {day1.Task1, day1.Task2},
+			2:  {day2.Task1, day2.Task2},
+			3:  {day3.Task1, day3.Task2},
+			4:  {day4.Task1, day4.Task2},
+			5:  {day5.Task1, day5.Task2},
+			6:  {day6.Task1, day6.Task2},
+			7:  {day7.Task1, day7.Task2},
+			8:  {day8.Task1, day8.Task2},
+			9:  {day9.Task1, day9.Task2},
+			10: {day10.Task1, day10.Task2},
 		}
 
 		lenT := len(tasks)
