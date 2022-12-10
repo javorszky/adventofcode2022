@@ -21,7 +21,7 @@ func Task1(l zerolog.Logger) {
 	}
 
 	// 20th, 60th, 100th, 140th, 180th, and 220th
-	cycleValues := make(map[int]int)
+	cycleValues := make([]int, 241)
 	cycleValues[0] = 1
 
 	currentCycle := 0
