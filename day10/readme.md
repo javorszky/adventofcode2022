@@ -199,6 +199,15 @@ Find the signal strength during the 20th, 60th, 100th, 140th, 180th, and 220th c
 
 ### Solution
 
+The hardest part is keeping track of indexes and when to increment things. Luckily there are a few possibilities here, so if you don't get it right the first time, you can adjust and rerun the script again.
+
+* first I wrote a function that parsed the commands (each line of the input) into what it does: how long it takes and how much the register changes
+  * noop takes 1, changes by 0
+  * addx takes 2, changes by whatever number comes after it
+* then created a `map[int]int` initially, to store the current cycle (key) and the current register value in it
+* for each line, I took the cycles taken and the register changes, and stuck them into the map
+* at the end I read out the values at keys 20, 60, 100, 140, 180, and 220 and multiplied them by those numbers, which was the solution
+
 ## Part 2
 
 It seems like the X register controls the horizontal position of a sprite. Specifically, the sprite is 3 pixels wide, and the X register sets the horizontal position of the middle of that sprite. (In this system, there is no such thing as "vertical position": if the sprite's horizontal position puts its pixels where the CRT is currently drawing, then those pixels will be drawn.)
@@ -327,3 +336,15 @@ Allowing the program to run to completion causes the CRT to produce the followin
 Render the image given by your program. What eight capital letters appear on your CRT?
 
 ### Solution
+
+Slight variation on the above, but now involves a `strings.Builder`.
+
+The example input renders that screen - it's a calibration one: first row is 2 on 2 off, next is 3 on 3 off, etc.
+
+There are 6 rows and 40 columns, so it's a nested for loop. The current row * max col + current col +1 (because register begins being useful at cycle 1 instead of 0) gives the current tick which I used as a key to look up the register value in the slice of values.
+
+Then it's a case of comparison: is the register value, reg +1, or reg -1 equal to the current column value? If so, draw a pound sign, otherwise a dot.
+
+At the end of each row, when the col for loop finished, add a line break.
+
+Solution is the string value of the strings builder.
