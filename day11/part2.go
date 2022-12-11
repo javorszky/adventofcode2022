@@ -1,7 +1,6 @@
 package day11
 
 import (
-	"math/big"
 	"sort"
 
 	"github.com/rs/zerolog"
@@ -10,7 +9,7 @@ import (
 func Task2(l zerolog.Logger) {
 	localLogger := l.With().Int("day", 11).Int("part", 2).Logger()
 
-	cd := func(item *big.Int) *big.Int {
+	cd := func(item int) int {
 		return item
 	}
 

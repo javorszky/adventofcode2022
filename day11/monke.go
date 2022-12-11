@@ -1,39 +1,40 @@
 package day11
 
 import (
-	"math/big"
-
 	"github.com/rs/zerolog"
 )
 
 // reject modernity, embrace monke
 
+// this is 2 * 3 * 5 * 7 * 11 * 13 * 17 * 19, the product of all prime numbers that the monkeys use to test divisibility
+// by.
+const primeProduct = 9699690
+
 type monke struct {
 	l        zerolog.Logger
-	op       func(*big.Int) *big.Int
+	op       func(int) int
 	div      int
-	mod      func(*big.Int) *big.Int
-	coolDown func(*big.Int) *big.Int
-	success  func(*big.Int)
-	fail     func(*big.Int)
-	items    chan *big.Int
+	mod      func(int) int
+	coolDown func(int) int
+	preSend  func(int) int
+	success  *monke
+	fail     *monke
+	items    chan int
 	activity int
 }
 
-func (m *monke) receive(item *big.Int) {
+func (m *monke) receive(item int) {
 	m.l.Debug().Msgf("received %d, normalizing", item)
-	bla := m.coolDown(m.op(item))
-	mod := m.mod(bla)
 
 	m.items <- item
 }
 
 func (m *monke) setSuccessMonke(sm *monke) {
-	m.success = sm.receive
+	m.success = sm
 }
 
 func (m *monke) setFailMonke(fm *monke) {
-	m.fail = fm.receive
+	m.fail = fm
 }
 
 func (m *monke) run() {
@@ -45,15 +46,17 @@ func (m *monke) run() {
 		m.activity++
 		inspected := m.op(next)
 		cooledDown := m.coolDown(inspected)
+		pre := m.preSend(cooledDown)
 
-		if m.mod(cooledDown).Int64() == 0 {
-			m.l.Debug().Msgf("sent %d to success", cooledDown)
-			m.success(cooledDown)
+		if m.mod(pre) == 0 {
+			m.l.Debug().Msgf("sent %d to success", pre)
+
+			m.success.receive(pre)
 			continue
 		}
 
-		m.l.Debug().Msgf("sent %d to fail", cooledDown)
-		m.fail(cooledDown)
+		m.l.Debug().Msgf("sent %d to fail", pre)
+		m.fail.receive(pre)
 	}
 }
 
@@ -61,14 +64,22 @@ func (m *monke) steps() int {
 	return m.activity
 }
 
-func newMonke(l zerolog.Logger, items []*big.Int, op func(*big.Int) *big.Int, div int, coolDown func(*big.Int) *big.Int) *monke {
+func newMonke(
+	l zerolog.Logger,
+	items []int,
+	op func(int) int,
+	div int,
+	coolDown func(int) int,
+	preSend func(int) int,
+) *monke {
 	m := &monke{
 		l:        l,
-		items:    make(chan *big.Int, 40),
+		items:    make(chan int, 40),
 		op:       op,
 		div:      div,
 		mod:      generateModuloFn(div),
 		coolDown: coolDown,
+		preSend:  preSend,
 		activity: 0,
 	}
 
@@ -79,126 +90,134 @@ func newMonke(l zerolog.Logger, items []*big.Int, op func(*big.Int) *big.Int, di
 	return m
 }
 
-func getMonkes(l zerolog.Logger, cd func(*big.Int) *big.Int) []*monke {
+func getMonkes(l zerolog.Logger, cd func(int) int) []*monke {
 	m0 := newMonke(
 		l.With().Str("monke", "zero").Logger(),
-		[]*big.Int{
-			big.NewInt(96),
-			big.NewInt(60),
-			big.NewInt(68),
-			big.NewInt(91),
-			big.NewInt(83),
-			big.NewInt(57),
-			big.NewInt(85),
+		[]int{
+			96,
+			60,
+			68,
+			91,
+			83,
+			57,
+			85,
 		},
-		func(i *big.Int) *big.Int {
-			return i.Mul(i, big.NewInt(2))
+		func(i int) int {
+			return i * 2
 		},
 		17,
 		cd,
+		preSend,
 	)
 
 	m1 := newMonke(
 		l.With().Str("monke", "one").Logger(),
-		[]*big.Int{
-			big.NewInt(75),
-			big.NewInt(78),
-			big.NewInt(68),
-			big.NewInt(81),
-			big.NewInt(73),
-			big.NewInt(99),
+		[]int{
+			75,
+			78,
+			68,
+			81,
+			73,
+			99,
 		},
-		func(i *big.Int) *big.Int {
-			return i.Add(i, big.NewInt(3))
+		func(i int) int {
+			return i + 3
 		},
 		13,
 		cd,
+		preSend,
 	)
 
 	m2 := newMonke(
 		l.With().Str("monke", "two").Logger(),
-		[]*big.Int{
-			big.NewInt(69),
-			big.NewInt(86),
-			big.NewInt(67),
-			big.NewInt(55),
-			big.NewInt(96),
-			big.NewInt(69),
-			big.NewInt(94),
-			big.NewInt(85)},
-		func(i *big.Int) *big.Int {
-			return i.Add(i, big.NewInt(6))
+		[]int{
+			69,
+			86,
+			67,
+			55,
+			96,
+			69,
+			94,
+			85},
+		func(i int) int {
+			return i + 6
 		},
 		19,
 		cd,
+		preSend,
 	)
 
 	m3 := newMonke(
 		l.With().Str("monke", "three").Logger(),
-		[]*big.Int{
-			big.NewInt(88),
-			big.NewInt(75),
-			big.NewInt(74),
-			big.NewInt(98),
-			big.NewInt(80),
+		[]int{
+			88,
+			75,
+			74,
+			98,
+			80,
 		},
-		func(i *big.Int) *big.Int {
-			return i.Add(i, big.NewInt(5))
+		func(i int) int {
+			return i + 5
 		},
 		7,
 		cd,
+		preSend,
 	)
 
 	m4 := newMonke(
 		l.With().Str("monke", "four").Logger(),
-		[]*big.Int{big.NewInt(82)},
-		func(i *big.Int) *big.Int {
-			return i.Add(i, big.NewInt(8))
+		[]int{82},
+		func(i int) int {
+			return i + 8
 		},
 		11,
 		cd,
+		preSend,
 	)
 
 	m5 := newMonke(
 		l.With().Str("monke", "five").Logger(),
-		[]*big.Int{
-			big.NewInt(72),
-			big.NewInt(92),
-			big.NewInt(92),
+		[]int{
+			72,
+			92,
+			92,
 		},
-		func(i *big.Int) *big.Int {
-			return i.Mul(i, big.NewInt(5))
+		func(i int) int {
+			return i * 5
 		},
 		3,
 		cd,
+		preSend,
 	)
 
 	m6 := newMonke(
 		l.With().Str("monke", "six").Logger(),
-		[]*big.Int{
-			big.NewInt(74),
-			big.NewInt(61),
+		[]int{
+			74,
+			61,
 		},
-		func(i *big.Int) *big.Int {
-			return i.Mul(i, i)
+		func(i int) int {
+			return i * i
 		},
 		2,
 		cd,
+		preSend,
 	)
 
 	m7 := newMonke(
 		l.With().Str("monke", "seven").Logger(),
-		[]*big.Int{
-			big.NewInt(76),
-			big.NewInt(86),
-			big.NewInt(83),
-			big.NewInt(55),
+		[]int{
+			76,
+			86,
+			83,
+			55,
 		},
-		func(i *big.Int) *big.Int {
-			return i.Add(i, big.NewInt(4))
+		func(i int) int {
+			return i + 4
 		},
 		5,
 		cd,
+		preSend,
 	)
 
 	m0.setSuccessMonke(m2)
@@ -228,59 +247,63 @@ func getMonkes(l zerolog.Logger, cd func(*big.Int) *big.Int) []*monke {
 	return []*monke{m0, m1, m2, m3, m4, m5, m6, m7}
 }
 
-func getExampleMonkes(l zerolog.Logger, cd func(*big.Int) *big.Int) []*monke {
+func getExampleMonkes(l zerolog.Logger, cd func(int) int) []*monke {
 	m0 := newMonke(
 		l.With().Str("monke", "zero").Logger(),
-		[]*big.Int{
-			big.NewInt(79),
-			big.NewInt(98),
+		[]int{
+			79,
+			98,
 		},
-		func(i *big.Int) *big.Int {
-			return i.Mul(i, big.NewInt(19))
+		func(i int) int {
+			return i * 19
 		},
 		23,
 		cd,
+		preSend,
 	)
 
 	m1 := newMonke(
 		l.With().Str("monke", "one").Logger(),
-		[]*big.Int{
-			big.NewInt(54),
-			big.NewInt(65),
-			big.NewInt(75),
-			big.NewInt(74),
+		[]int{
+			54,
+			65,
+			75,
+			74,
 		},
-		func(i *big.Int) *big.Int {
-			return i.Add(i, big.NewInt(6))
+		func(i int) int {
+			return i + 6
 		},
 		19,
 		cd,
+		preSend,
 	)
 
 	m2 := newMonke(
 		l.With().Str("monke", "two").Logger(),
-		[]*big.Int{
-			big.NewInt(79),
-			big.NewInt(60),
-			big.NewInt(97),
+		[]int{
+			79,
+			60,
+			97,
 		},
-		func(i *big.Int) *big.Int {
-			return i.Mul(i, i)
+		func(i int) int {
+			return i * i
 		},
 		13,
 		cd,
+		preSend,
 	)
 
 	m3 := newMonke(
 		l.With().Str("monke", "three").Logger(),
-		[]*big.Int{
-			big.NewInt(74),
+		[]int{
+			74,
 		},
-		func(i *big.Int) *big.Int {
-			return i.Add(i, big.NewInt(3))
+		func(i int) int {
+			return i + 3
 		},
 		17,
 		cd,
+		preSend,
 	)
 
 	m0.setSuccessMonke(m2)
@@ -296,4 +319,8 @@ func getExampleMonkes(l zerolog.Logger, cd func(*big.Int) *big.Int) []*monke {
 	m3.setFailMonke(m1)
 
 	return []*monke{m0, m1, m2, m3}
+}
+
+func preSend(in int) int {
+	return in % primeProduct
 }

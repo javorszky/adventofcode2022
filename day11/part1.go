@@ -1,7 +1,6 @@
 package day11
 
 import (
-	"math/big"
 	"sort"
 
 	"github.com/rs/zerolog"
@@ -39,13 +38,12 @@ func Task1(l zerolog.Logger) {
 	s.Info().Msgf("Monke business for part 1 after 20 rounds is %d", solution)
 }
 
-func coolDownP1(in *big.Int) *big.Int {
-	return in.Div(in, big.NewInt(3))
+func coolDownP1(in int) int {
+	return in / 3
 }
 
-func generateModuloFn(in int) func(*big.Int) *big.Int {
-	return func(d *big.Int) *big.Int {
-		z := big.NewInt(0)
-		return z.Mod(d, big.NewInt(int64(in)))
+func generateModuloFn(in int) func(int) int {
+	return func(d int) int {
+		return d % in
 	}
 }
