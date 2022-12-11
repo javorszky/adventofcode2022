@@ -5,6 +5,7 @@ import (
 	"strconv"
 
 	"github.com/javorszky/adventofcode2022/day10"
+	"github.com/javorszky/adventofcode2022/day11"
 
 	"github.com/javorszky/adventofcode2022/day9"
 
@@ -35,7 +36,7 @@ to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		l := zerolog.New(zerolog.NewConsoleWriter()).With().Timestamp().Str("module", "adventofcode").Int("year", 2022).Logger()
 		l.Info().Msg("Welcome to Gabor Javorszky's Advent of Code 2022 solutions!")
-		zerolog.SetGlobalLevel(zerolog.InfoLevel)
+		zerolog.SetGlobalLevel(zerolog.DebugLevel)
 
 		tasks := map[int][2]func(logger zerolog.Logger){
 			1:  {day1.Task1, day1.Task2},
@@ -48,6 +49,7 @@ to quickly create a Cobra application.`,
 			8:  {day8.Task1, day8.Task2},
 			9:  {day9.Task1, day9.Task2},
 			10: {day10.Task1, day10.Task2},
+			11: {day11.Task1, day11.Task2},
 		}
 
 		lenT := len(tasks)

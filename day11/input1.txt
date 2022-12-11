@@ -1,12 +1,12 @@
 Monkey 0:
-  Starting items: 96, 60, 68, 91, 83, 57, 85
+  Starting items: 96, 60, 68, 91, 83, 57, 85 // 7
   Operation: new = old * 2
   Test: divisible by 17
     If true: throw to monkey 2
     If false: throw to monkey 5
 
 Monkey 1:
-  Starting items: 75, 78, 68, 81, 73, 99
+  Starting items: 75, 78, 68, 81, 73, 99 // 6
   Operation: new = old + 3
   Test: divisible by 13
     If true: throw to monkey 7
