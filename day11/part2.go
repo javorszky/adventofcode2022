@@ -1,24 +1,42 @@
 package day11
 
 import (
-	"os"
+	"math/big"
+	"sort"
 
-	"github.com/javorszky/adventofcode2022/inputs"
 	"github.com/rs/zerolog"
 )
 
 func Task2(l zerolog.Logger) {
 	localLogger := l.With().Int("day", 11).Int("part", 2).Logger()
 
-	_, err := inputs.ReadIntoLines("day11/input2.txt")
-	if err != nil {
-		localLogger.Err(err).Msg("could not read input file")
-		os.Exit(1)
+	cd := func(item *big.Int) *big.Int {
+		return item
 	}
 
-	// code goes here
+	//mks := getMonkes(localLogger, cd)
+	mks := getExampleMonkes(localLogger, cd)
 
-	solution := 2
+	localLogger.Debug().Msg("all right, let's kick it off!")
+
+	for i := 0; i < 1000; i++ {
+		localLogger.Info().Msgf("iter %d", i)
+		for _, currentMonke := range mks {
+			currentMonke.run()
+		}
+	}
+
+	localLogger.Debug().Msg("time to count stuff")
+
+	sort.Slice(mks, func(i, j int) bool {
+		return mks[i].steps() > mks[j].steps()
+	})
+
+	localLogger.Info().Msgf("%#v", mks)
+
+	localLogger.Debug().Msgf("and now for the final")
+
+	solution := mks[0].steps() * mks[1].steps()
 	s := localLogger.With().Int("solution", solution).Logger()
-	s.Info().Msgf("-- change this to the part 2 message -- %d", solution)
+	s.Info().Msgf("With no worry cooldown and 10,000 rounds, the product of the top two activity monkey is %d", solution)
 }
