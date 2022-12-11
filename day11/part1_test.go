@@ -1,29 +1,28 @@
 package day11
 
 import (
-	"math/big"
 	"reflect"
 	"testing"
 )
 
 func Test_coolDownP1(t *testing.T) {
 	type args struct {
-		in *big.Int
+		in int
 	}
 	tests := []struct {
 		name string
 		args args
-		want *big.Int
+		want int
 	}{
 		{
 			name: "6 divided by 3 is 2",
-			args: args{in: big.NewInt(6)},
-			want: big.NewInt(2),
+			args: args{in: 6},
+			want: 2,
 		},
 		{
 			name: "5 divided by 3 is 1",
-			args: args{in: big.NewInt(5)},
-			want: big.NewInt(1),
+			args: args{in: 5},
+			want: 1,
 		},
 	}
 	for _, tt := range tests {
@@ -65,8 +64,8 @@ func Test_generateDivisibleFn(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			fn := generateModuloFn(tt.args.divisor)
-			got := fn(big.NewInt(int64(tt.args.num)))
-			if got != tt.want {
+			got := fn(tt.args.num)
+			if got == 0 != tt.want {
 				t.Errorf("generateModuloFn() = %v, want %v", got, tt.want)
 			}
 		})

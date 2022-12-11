@@ -19,6 +19,7 @@ const (
 
 type monke struct {
 	l        zerolog.Logger
+	name     string
 	op       func(int) int
 	div      int
 	mod      func(int) int
@@ -31,7 +32,7 @@ type monke struct {
 }
 
 func (m *monke) receive(item int) {
-	m.l.Debug().Msgf("received %d, normalizing", item)
+	m.l.Debug().Msgf("received %d", item)
 
 	m.items <- item
 }
@@ -45,24 +46,29 @@ func (m *monke) setFailMonke(fm *monke) {
 }
 
 func (m *monke) run() {
+	m.l.Debug().Msgf("🐒 %s", m.name)
 	for {
 		if len(m.items) == 0 {
 			break
 		}
 		next := <-m.items
 		m.activity++
+		m.l.Debug().Msgf("-- item %d", next)
 		inspected := m.op(next)
+		m.l.Debug().Msgf("-- operated: %d", inspected)
 		cooledDown := m.coolDown(inspected)
+		m.l.Debug().Msgf("-- cooldown: %d", cooledDown)
 		pre := m.preSend(cooledDown)
+		m.l.Debug().Msgf("-- presend: %d", pre)
 
 		if m.mod(pre) == 0 {
-			m.l.Debug().Msgf("sent %d to success", pre)
+			m.l.Debug().Msgf("✅sent %d to success", pre)
 
 			m.success.receive(pre)
 			continue
 		}
 
-		m.l.Debug().Msgf("sent %d to fail", pre)
+		m.l.Debug().Msgf("❌ sent %d to fail", pre)
 		m.fail.receive(pre)
 	}
 }
@@ -73,6 +79,7 @@ func (m *monke) steps() int {
 
 func newMonke(
 	l zerolog.Logger,
+	name string,
 	items []int,
 	op func(int) int,
 	div int,
@@ -81,6 +88,7 @@ func newMonke(
 ) *monke {
 	m := &monke{
 		l:        l,
+		name:     name,
 		items:    make(chan int, 40),
 		op:       op,
 		div:      div,
@@ -100,6 +108,7 @@ func newMonke(
 func getMonkes(l zerolog.Logger, cd func(int) int) []*monke {
 	m0 := newMonke(
 		l.With().Str("monke", "zero").Logger(),
+		"monkey 0",
 		[]int{
 			96,
 			60,
@@ -119,6 +128,7 @@ func getMonkes(l zerolog.Logger, cd func(int) int) []*monke {
 
 	m1 := newMonke(
 		l.With().Str("monke", "one").Logger(),
+		"monkey 1",
 		[]int{
 			75,
 			78,
@@ -137,6 +147,7 @@ func getMonkes(l zerolog.Logger, cd func(int) int) []*monke {
 
 	m2 := newMonke(
 		l.With().Str("monke", "two").Logger(),
+		"monkey 2",
 		[]int{
 			69,
 			86,
@@ -156,6 +167,7 @@ func getMonkes(l zerolog.Logger, cd func(int) int) []*monke {
 
 	m3 := newMonke(
 		l.With().Str("monke", "three").Logger(),
+		"monkey 3",
 		[]int{
 			88,
 			75,
@@ -173,6 +185,7 @@ func getMonkes(l zerolog.Logger, cd func(int) int) []*monke {
 
 	m4 := newMonke(
 		l.With().Str("monke", "four").Logger(),
+		"monkey 4",
 		[]int{82},
 		func(i int) int {
 			return i + 8
@@ -184,6 +197,7 @@ func getMonkes(l zerolog.Logger, cd func(int) int) []*monke {
 
 	m5 := newMonke(
 		l.With().Str("monke", "five").Logger(),
+		"monkey 5",
 		[]int{
 			72,
 			92,
@@ -199,6 +213,7 @@ func getMonkes(l zerolog.Logger, cd func(int) int) []*monke {
 
 	m6 := newMonke(
 		l.With().Str("monke", "six").Logger(),
+		"monkey 6",
 		[]int{
 			74,
 			61,
@@ -213,6 +228,7 @@ func getMonkes(l zerolog.Logger, cd func(int) int) []*monke {
 
 	m7 := newMonke(
 		l.With().Str("monke", "seven").Logger(),
+		"monkey 7",
 		[]int{
 			76,
 			86,
@@ -257,6 +273,7 @@ func getMonkes(l zerolog.Logger, cd func(int) int) []*monke {
 func getExampleMonkes(l zerolog.Logger, cd func(int) int) []*monke {
 	m0 := newMonke(
 		l.With().Str("monke", "zero").Logger(),
+		"example monkey 0",
 		[]int{
 			79,
 			98,
@@ -271,6 +288,7 @@ func getExampleMonkes(l zerolog.Logger, cd func(int) int) []*monke {
 
 	m1 := newMonke(
 		l.With().Str("monke", "one").Logger(),
+		"example monkey 1",
 		[]int{
 			54,
 			65,
@@ -287,6 +305,7 @@ func getExampleMonkes(l zerolog.Logger, cd func(int) int) []*monke {
 
 	m2 := newMonke(
 		l.With().Str("monke", "two").Logger(),
+		"example monkey 2",
 		[]int{
 			79,
 			60,
@@ -302,6 +321,7 @@ func getExampleMonkes(l zerolog.Logger, cd func(int) int) []*monke {
 
 	m3 := newMonke(
 		l.With().Str("monke", "three").Logger(),
+		"example monkey 3",
 		[]int{
 			74,
 		},
@@ -333,5 +353,5 @@ func preSend(in int) int {
 }
 
 func preSendExample(in int) int {
-	return in & examplePrimeProduct
+	return in % examplePrimeProduct
 }

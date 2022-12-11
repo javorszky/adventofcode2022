@@ -13,13 +13,12 @@ func Task2(l zerolog.Logger) {
 		return item
 	}
 
-	//mks := getMonkes(localLogger, cd)
-	mks := getExampleMonkes(localLogger, cd)
+	mks := getMonkes(localLogger, cd)
+	//mks := getExampleMonkes(localLogger, cd)
 
 	localLogger.Debug().Msg("all right, let's kick it off!")
 
-	for i := 0; i < 1000; i++ {
-		localLogger.Info().Msgf("iter %d", i)
+	for i := 0; i < 10000; i++ {
 		for _, currentMonke := range mks {
 			currentMonke.run()
 		}
@@ -31,7 +30,9 @@ func Task2(l zerolog.Logger) {
 		return mks[i].steps() > mks[j].steps()
 	})
 
-	localLogger.Info().Msgf("%#v", mks)
+	for _, mnk := range mks {
+		localLogger.Info().Msgf("%s: checked %d", mnk.name, mnk.steps())
+	}
 
 	localLogger.Debug().Msgf("and now for the final")
 
