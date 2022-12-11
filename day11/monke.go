@@ -6,9 +6,16 @@ import (
 
 // reject modernity, embrace monke
 
-// this is 2 * 3 * 5 * 7 * 11 * 13 * 17 * 19, the product of all prime numbers that the monkeys use to test divisibility
 // by.
-const primeProduct = 9699690
+const (
+	// this is 2 * 3 * 5 * 7 * 11 * 13 * 17 * 19, the product of all prime numbers that the monkeys use to test
+	// divisibility by.
+	primeProduct = 9699690
+
+	// this is 13 * 17 * 19 * 23, the product of all prime numbers that the monkeys in the example use to test
+	// divisibility by.
+	examplePrimeProduct = 96577
+)
 
 type monke struct {
 	l        zerolog.Logger
@@ -259,7 +266,7 @@ func getExampleMonkes(l zerolog.Logger, cd func(int) int) []*monke {
 		},
 		23,
 		cd,
-		preSend,
+		preSendExample,
 	)
 
 	m1 := newMonke(
@@ -275,7 +282,7 @@ func getExampleMonkes(l zerolog.Logger, cd func(int) int) []*monke {
 		},
 		19,
 		cd,
-		preSend,
+		preSendExample,
 	)
 
 	m2 := newMonke(
@@ -290,7 +297,7 @@ func getExampleMonkes(l zerolog.Logger, cd func(int) int) []*monke {
 		},
 		13,
 		cd,
-		preSend,
+		preSendExample,
 	)
 
 	m3 := newMonke(
@@ -303,7 +310,7 @@ func getExampleMonkes(l zerolog.Logger, cd func(int) int) []*monke {
 		},
 		17,
 		cd,
-		preSend,
+		preSendExample,
 	)
 
 	m0.setSuccessMonke(m2)
@@ -323,4 +330,8 @@ func getExampleMonkes(l zerolog.Logger, cd func(int) int) []*monke {
 
 func preSend(in int) int {
 	return in % primeProduct
+}
+
+func preSendExample(in int) int {
+	return in & examplePrimeProduct
 }
