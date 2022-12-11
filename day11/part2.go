@@ -31,7 +31,7 @@ func Task2(l zerolog.Logger) {
 	})
 
 	for _, mnk := range mks {
-		localLogger.Info().Msgf("%s: checked %d", mnk.name, mnk.steps())
+		localLogger.Debug().Msgf("%s: checked %d", mnk.name, mnk.steps())
 	}
 
 	localLogger.Debug().Msgf("and now for the final")
