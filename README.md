@@ -10,3 +10,4 @@
 * [day 8](day8) - it's just a lot of for loops. Like, a LOT
 * [day 9](day9) - hm, coordinate system, links, lots of loops again, early exits
 * [day 10](day10) - for loops, registers, strings.Builder, keeping track of values
+* [day 11](day11) - channels, multi-tree, primes, normalization, and functional structs

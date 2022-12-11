@@ -224,6 +224,34 @@ Figure out which monkeys to chase by counting how many items they inspect over 2
 
 ### Solution
 
+Heh, this was fun. Basically it's... a linked list? Of sorts? Except each monkey has two connections, and there are a bunch of processors involved as well.
+
+Each monkey has a buffered channel of integers, where buf = 40, which is slightly longer than all the items all the monkeys have, so sending to it won't block.
+
+Each monkey also has a test function, a cooldown function, and an op function. Test function is the "is this divisible by X?" to make the decision which monkey to throw the item to.
+
+The cooldown function is the "divide by 3 and round down" for anxiety that they didn't break it.
+
+The op function is the operation the monkey does. Square the number, add a number, etc.
+
+There's a `new` function that gives us a pointer to a monkey instance that we need to pass all the required details to:
+* a logger
+* name
+* items
+* function to operate
+* function to test (itself a generator)
+* function to cool down
+
+Once we have all the 8 monkeys, we can then add the success / fail monkeys to each of them. We need all 8 to exist before we can pass a pointer to the others to them.
+
+A round is essentially starting with monkey 0 (in the slice), and calling `run` on it. That will drain its queue of items (for loop which breaks if `len(chan) == 0`), do the operation / cooldown / test on it, and then send it off to the appropriate monkey.
+
+Sending an item is passing the number to the `receive` method of the new monkey. That `receive` method pushes the number into the queue, so it's at the end.
+
+Whenever there's an operation on an item, an internal counter is incremented by one for each monkey.
+
+Once we've done the 20 rounds, we then sort the monkeys by activity (the value of the counter) in a descending order, and multiply the two biggest numbers, and that's the solution.
+
 ## Part 2
 
 You're worried you might not ever get your items back. So worried, in fact, that your relief that a monkey's inspection didn't damage an item no longer causes your worry level to be divided by three.
@@ -311,3 +339,15 @@ After 10000 rounds, the two most active monkeys inspected items 52166 and 52013 
 Worry levels are no longer divided by three after each item is inspected; you'll need to find another way to keep your worry levels manageable. Starting again from the initial state in your puzzle input, what is the level of monkey business after 10000 rounds?
 
 ### Solution
+
+As above, with the twist that there's a new function: `preSend`, which normalises the number. At about 984 rounds, using big integers in Go, calculations start being noticeably slow. Regular integers overflow waaaay before that, so neither really works.
+
+Because all the tests are prime numbers, we can construct the product of all the monkey's primes, and get the modulo of the number that is set to be tested. mod 13 on the original number is going to be the same as on the original number:
+
+```
+x := n % 13
+y := (n % (13 * 19)) % 13
+
+x == y
+```
+This way the numbers don't get silly large.
