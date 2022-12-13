@@ -188,9 +188,9 @@ func (em *elevationMap) canGoThere(coord, depth int, elevation int32, visited ma
 	}
 
 	diff := v - elevation
-	if diff < -1 || diff > 1 {
-		// tile too tall / deep to go there
-		return fmt.Errorf("elevation is too big at %d, %d, (%d %s -> %d %s)", row, col, elevation, string(elevation), v, string(v))
+	if diff > 1 {
+		// tile too tall
+		return fmt.Errorf("elevation is too tall at %d, %d, (%d %s -> %d %s)", row, col, elevation, string(elevation), v, string(v))
 	}
 
 	seen, ok := visited[coord]
