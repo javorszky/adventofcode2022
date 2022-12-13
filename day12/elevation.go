@@ -76,12 +76,12 @@ func parseInput(gog []string, l zerolog.Logger) *elevationMap {
 		for col, char := range line {
 			cb := coordToBinary(row, col)
 			m[cb] = char
-			// start
+			// start, denoted by S (char 83), but actually should store a (97)
 			if char == 83 {
 				m[cb] = 97
 				start = cb
 			}
-			// end
+			// end, denoted by E (char 69 (nice)), but actually should store z (122)
 			if char == 69 {
 				m[cb] = 122
 				goal = cb
@@ -129,7 +129,7 @@ func (em *elevationMap) shortestRoute() [][]int {
 
 		route = append(route, coord)
 		if coord == em.goal {
-			em.l.Debug().Msgf("!!! - we have found a route! %v", route)
+			em.l.Info().Msgf("!!! - we have found a route! %v", route)
 			// we have found a way!
 			return [][]int{route}
 		}
