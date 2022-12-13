@@ -5,6 +5,7 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/pkg/errors"
 	"github.com/rs/zerolog"
 )
 
@@ -116,7 +117,7 @@ func (em *elevationMap) String() string {
 	return sb.String()
 }
 
-func (em *elevationMap) shortestRoute() [][]int {
+func (em *elevationMap) shortestRoute(start int, success func(int, int32) bool, canClimb func(int32, int32) error) [][]int {
 	visitedInSteps := make(map[int]int)
 	var goThere func(int, int, int32, []int, int) [][]int
 
@@ -128,7 +129,7 @@ func (em *elevationMap) shortestRoute() [][]int {
 		em.l.Debug().Msgf("checking [%d, %d](%d) -> [%d, %d](%d) {%d}", pRow, pCol, previousElevation, row, col, currentElevation, depth)
 
 		route = append(route, coord)
-		if coord == em.goal {
+		if success(coord, currentElevation) {
 			em.l.Info().Msgf("!!! - we have found a route! %v", route)
 			// we have found a way!
 			return [][]int{route}
@@ -150,7 +151,7 @@ func (em *elevationMap) shortestRoute() [][]int {
 				continue
 			}
 
-			if err := em.canGoThere(c, depth+1, currentElevation, visitedInSteps); err != nil {
+			if err := em.canGoThere(c, depth+1, currentElevation, visitedInSteps, canClimb); err != nil {
 				drow, dcol := binaryToCoord(c)
 				em.l.Debug().Msgf("-- can't go to %d, %d: %s", drow, dcol, err.Error())
 				continue
@@ -167,9 +168,9 @@ func (em *elevationMap) shortestRoute() [][]int {
 		return routes
 	}
 
-	em.l.Debug().Msgf("okay, starting at the goal point...")
+	em.l.Debug().Msgf("okay, starting at point %d...", start)
 	// start at goal which is at elevation z, which is code point 122
-	routes := goThere(em.start, em.start, em.grid[em.start], []int{}, 0)
+	routes := goThere(start, start, em.grid[start], []int{}, 0)
 
 	em.l.Debug().Msgf("routes we got back are\n%#v", routes)
 	sort.Slice(routes, func(i, j int) bool {
@@ -179,7 +180,7 @@ func (em *elevationMap) shortestRoute() [][]int {
 	return routes
 }
 
-func (em *elevationMap) canGoThere(coord, depth int, elevation int32, visited map[int]int) error {
+func (em *elevationMap) canGoThere(coord, depth int, elevation int32, visited map[int]int, canClimb func(int32, int32) error) error {
 	v, ok := em.grid[coord]
 	row, col := binaryToCoord(coord)
 	if !ok {
@@ -187,10 +188,9 @@ func (em *elevationMap) canGoThere(coord, depth int, elevation int32, visited ma
 		return fmt.Errorf("tile does not exist at %d, %d", row, col)
 	}
 
-	diff := v - elevation
-	if diff > 1 {
+	if err := canClimb(v, elevation); err != nil {
 		// tile too tall
-		return fmt.Errorf("elevation is too tall at %d, %d, (%d %s -> %d %s)", row, col, elevation, string(elevation), v, string(v))
+		return errors.Wrapf(err, "can't climb to  %d, %d, (%d %s -> %d %s)", row, col, elevation, string(elevation), v, string(v))
 	}
 
 	seen, ok := visited[coord]

@@ -26,7 +26,16 @@ func Task1(l zerolog.Logger) {
 
 	fmt.Printf("start: %v\ngoal: %v\n", em.start, em.goal)
 
-	routes := em.shortestRoute()
+	routes := em.shortestRoute(em.start, func(coord int, _ int32) bool {
+		return coord == em.goal
+	}, func(currentElevation int32, previousElevation int32) error {
+		if currentElevation-previousElevation > 1 {
+			return fmt.Errorf("elevation distance too tall: %d -> %d", previousElevation, currentElevation)
+		}
+
+		return nil
+	})
+
 	for _, r := range routes {
 		localLogger.Debug().Msgf("Route length is %d", len(r))
 
