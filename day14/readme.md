@@ -127,6 +127,61 @@ Using your scan, simulate the falling sand. How many units of sand come to rest 
 
 ### Solution
 
+#### Parse the input into discreet coordinates
+* for each line, break them up by ` -> `
+* then for each resulting coordinate, grab the x, y and turn them into integers
+* loop through the list of coordinates (now integer pair) until the penultimate one, and generate the missing points between the current, and the next element
+  * for example if the element is [2,6] and the next one is [2,9], the entire generated line is going to be [2,6], [2,7], [2,8], [2, 9]
+* store those into a global slice. This is where the rocks are
+* while doing that, also keep track of the min max of row and col
+  * row's lowest value is 0, this is the height the sand's entry point is, max is whatever max y value happens to be
+  * col's lowest value is 1<<32 (a ridiculously large number), highest is 0 to start with, and then for each point in the input adjust this
+* once we have our min max of row / col coordinates, and our list of rocks, let's build the map in three steps
+  * step 1: for each row:
+    * for each column in that row:
+      * turn the coordinate into a single number using the helper function
+      * mark that coordinate as air, `.` on the map
+    * this should give us a rectangle of all air
+  * step 2: for each item in the list of rocks:
+    * turn their coordinate into the single int using the helper function
+    * mark it as rock `#`
+  * step 3: mark 0, 500 as the entry point for sand with `+`
+
+#### Deal with sand
+
+* create a new struct that represents a unit of sand
+* on initialisation it receives the current snapshot of the grid, air, rocks, entry point, and existing sands at rest
+* set the starting coordinate to 0, 500 (entry point)
+* have helper functions that give us the next coordinate for down-left, down, down-right
+* start looping. On each iteration:
+  * check whether it can move down, ie the thing at the `down` coordinate relative to current coordinate is `air`
+    * if it is, set the current coordinate to the down coordinate, and iterate
+    * if it is not, it doesn't matter what other thing it is, continue checking
+  * check down-left:
+    * if air, move there
+    * if not, continue checking
+  * check down-right:
+    * if air, move there
+    * if not, we've come to rest
+  * if during any point the next coordinate doesn't exist on the world (not in the map), then it flows to the abyss, and we bubble this error back up
+  * if we've come to rest, return the resting coordinate, and an "at rest" error
+
+#### Putting the two together
+
+* generate the world from the inputs
+* create a counter with 0 as starting value
+* start an infinite for loop. In each iteration:
+  * create a new sand from the current state of the grid
+  * loop until it finds a resting position
+  * check for return error:
+    * if it's an abyss error, we're done, break
+    * if it's an at rest error:
+      * grab returned coordinate, add that to the grid
+      * increment counter
+      * loop again
+* the only time we could break out from the loop is if one of the sands was yeeted into the abyss
+* that means we have a counter, which is the solution
+
 ## Part 2
 
 You realize you misread the scan. There isn't an endless void at the bottom of the scan - there's floor, and you're standing on it!
@@ -170,3 +225,23 @@ To find somewhere safe to stand, you'll need to simulate falling sand until a un
 Using your scan, simulate the falling sand until the source of the sand becomes blocked. How many units of sand come to rest?
 
 ### Solution
+
+Reusing the above.
+
+#### Modification to the inputs and the grid
+
+* once all lines of the input have been parsed, we'll add the floor:
+* grab the `rowMax` value and add 2 to it to get the height where our rock floor is going to sit
+* check if 500 - rowMax - 2 (2 for padding) is less than current colMin, if it is, set colMin to that
+* check if 500 + rowMax + 2 is more than current colMax, and if it is, set colMax to that
+* once we have our updated row / col min / max values, draw air everywhere
+* draw rocks from the input
+* generate a new line of rocks between [rowMax, 500-rowMax-2] and [rowMax, 500+rowMax+2] for the infinite floor
+* add those as rocks as well
+
+#### Sand
+Same as above, no change needed
+
+#### Altogether
+
+Only difference is the success criteria. Instead of checking for an abyss error in the infinite for loop, we're checking for the rest coordinate being the same as the entry point.

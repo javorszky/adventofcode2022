@@ -13,3 +13,4 @@
 * [day 11](day11) - channels, multi-tree, primes, normalization, and functional structs
 * [day 12](day12) - route finding and recursive functions!
 * [day 13](day13) - more recursion, sort implementation
+* [day 14](day14) - map, movement, grid, nothing special
