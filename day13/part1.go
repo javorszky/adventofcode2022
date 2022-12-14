@@ -1,7 +1,6 @@
 package day13
 
 import (
-	"fmt"
 	"os"
 
 	"github.com/javorszky/adventofcode2022/inputs"
@@ -11,18 +10,36 @@ import (
 func Task1(l zerolog.Logger) {
 	localLogger := l.With().Int("day", 13).Int("part", 1).Logger()
 
+	// gog, err := inputs.GroupByBlankLines("day13/example_input.txt")
 	gog, err := inputs.GroupByBlankLines("day13/input1.txt")
 	if err != nil {
 		localLogger.Err(err).Msg("could not read input file")
 		os.Exit(1)
 	}
 
-	fmt.Printf("\n\n%v\n\n", gog[0])
+	pairsInTheCorrectOrder := 0
+	for i, pair := range gog {
+		left, _, err := parseLine(pair[0], 0)
+		if err != nil {
+			localLogger.Err(err).Msgf("parsing first line '%s' in group %d", pair[0], i)
+			os.Exit(1)
+		}
 
-	_, _, _ = parseLine("0123456789", 0)
-	// code goes here
+		right, _, err := parseLine(pair[1], 0)
+		if err != nil {
+			localLogger.Err(err).Msgf("parsing second line '%s' in group %d", pair[1], i)
+			os.Exit(1)
+		}
 
-	solution := 2
-	s := localLogger.With().Int("solution", solution).Logger()
-	s.Info().Msgf("-- change this for the part 1 message -- %d", solution)
+		res := smallerList(left, right)
+		if res == continueEvaluation {
+			localLogger.Error().Msgf("comparing the following two lines resulted in an inconclusive result. This should not have happened!\n%s\n%s", left, right)
+		}
+		if res == correctOrder {
+			pairsInTheCorrectOrder += (i + 1)
+		}
+	}
+
+	s := localLogger.With().Int("solution", pairsInTheCorrectOrder).Logger()
+	s.Info().Msgf("The sum of indices of pairs that are correct is %d", pairsInTheCorrectOrder)
 }

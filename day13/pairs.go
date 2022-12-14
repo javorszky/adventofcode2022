@@ -25,6 +25,13 @@ const (
 	charLeftSquare  uint8 = 91
 	charRightSquare uint8 = 93
 	charComma       uint8 = 44
+
+	correctOrder = iota
+	incorrectOrder
+	continueEvaluation
+
+	typeList
+	typeInteger
 )
 
 var (
@@ -91,12 +98,100 @@ func parseLine(line string, d int) (list, int, error) {
 	return l, len(line), nil
 }
 
+// smallerList compares two lists, and returns which one is the shorter. It's using
+// three possible return values as iota consts:
+//
+// - correctOrder
+// - incorrectOrder
+// - continueEvaluation
+func smallerList(left, right list) int {
+	fallback := continueEvaluation
+
+	le := len(left)
+	lr := len(right)
+	min := le
+
+	if le < lr {
+		fallback = correctOrder
+	} else if lr < le {
+		min = lr
+		fallback = incorrectOrder
+	}
+
+	for i := 0; i < min; i++ {
+		le := left[i]
+		re := right[i]
+		switch le.Type() {
+		case typeInteger:
+			switch re.Type() {
+			case typeInteger:
+				// both integers, if left integer is lower, correct order
+				// right integer is lower, inputs are not in the same order
+				// integers same --> continue
+				if le.(integer) == re.(integer) {
+					// they are equal, no decision
+					continue
+				}
+
+				if le.(integer) < re.(integer) {
+					return correctOrder
+				}
+
+				return incorrectOrder
+			case typeList:
+				// left is integer, right is list
+				// if comparing list vs integer, make the integer into a list
+				// then compare lists as above
+				le = list{le}
+				result := smallerList(le.(list), re.(list))
+				if result == continueEvaluation {
+					continue
+				}
+
+				return result
+			}
+		case typeList:
+			switch re.Type() {
+			case typeList:
+				// both are lists, enter list, and start comparing values
+				// if left runs out of items first, correct order
+				// if right runs out of items first, incorrect order
+				// same length, contents also don't decide --> continue
+				result := smallerList(le.(list), re.(list))
+				if result == continueEvaluation {
+					continue
+				}
+
+				return result
+			case typeInteger:
+				// right is integer, left is list
+				// if comparing list vs integer, make the integer into a list
+				// then compare lists as above
+				re = list{re}
+				result := smallerList(le.(list), re.(list))
+				if result == continueEvaluation {
+					continue
+				}
+
+				return result
+			}
+		}
+	}
+
+	return fallback
+}
+
 type item interface {
 	String() string
 	Day13()
+	Type() int
 }
 
 type integer int
+
+func (i integer) Type() int {
+	return typeInteger
+}
 
 func (i integer) String() string {
 	return fmt.Sprintf(" %d ", i)
@@ -107,6 +202,10 @@ func (i integer) Day13() {
 }
 
 type list []item
+
+func (l list) Type() int {
+	return typeList
+}
 
 func (l list) String() string {
 	s := make([]string, len(l))

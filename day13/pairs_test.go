@@ -130,3 +130,113 @@ func Test_parseLine(t *testing.T) {
 		})
 	}
 }
+
+func Test_smallerList(t *testing.T) {
+	type args struct {
+		left  list
+		right list
+	}
+	tests := []struct {
+		name string
+		args args
+		want int
+	}{
+		{
+			name: "integers correct order",
+			args: args{
+				left: list{
+					integer(3),
+				},
+				right: list{
+					integer(4),
+				},
+			},
+			want: correctOrder,
+		},
+		{
+			name: "integers incorrect order",
+			args: args{
+				left: list{
+					integer(3),
+				},
+				right: list{
+					integer(2),
+				},
+			},
+			want: incorrectOrder,
+		},
+		{
+			name: "integers continue",
+			args: args{
+				left: list{
+					integer(3),
+				},
+				right: list{
+					integer(3),
+				},
+			},
+			want: continueEvaluation,
+		},
+		{
+			name: "shorter left list correct",
+			args: args{
+				left: list{
+					list{
+						integer(2),
+					},
+				},
+				right: list{
+					list{
+						integer(2),
+						integer(5),
+					},
+				},
+			},
+			want: correctOrder,
+		},
+		{
+			name: "shorter right list incorrect",
+			args: args{
+				left: list{
+					list{
+						integer(2),
+						integer(5),
+						integer(5),
+					},
+				},
+				right: list{
+					list{
+						integer(2),
+						integer(5),
+					},
+				},
+			},
+			want: incorrectOrder,
+		},
+		{
+			name: "same len list continue",
+			args: args{
+				left: list{
+					list{
+						integer(2),
+						integer(5),
+					},
+				},
+				right: list{
+					list{
+						integer(2),
+						integer(5),
+					},
+				},
+			},
+			want: continueEvaluation,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := smallerList(tt.args.left, tt.args.right); got != tt.want {
+				t.Errorf("smallerList() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
