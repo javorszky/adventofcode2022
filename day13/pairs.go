@@ -194,7 +194,7 @@ func (i integer) Type() int {
 }
 
 func (i integer) String() string {
-	return fmt.Sprintf(" %d ", i)
+	return fmt.Sprintf("%d", i)
 }
 
 func (i integer) Day13() {
@@ -212,7 +212,7 @@ func (l list) String() string {
 	for i, n := range l {
 		s[i] = n.String()
 	}
-	return fmt.Sprintf("[ %s ]", strings.Join(s, ", "))
+	return fmt.Sprintf("[%s]", strings.Join(s, ","))
 }
 
 func (l list) Day13() {

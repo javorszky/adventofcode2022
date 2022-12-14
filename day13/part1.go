@@ -10,7 +10,7 @@ import (
 func Task1(l zerolog.Logger) {
 	localLogger := l.With().Int("day", 13).Int("part", 1).Logger()
 
-	// gog, err := inputs.GroupByBlankLines("day13/example_input.txt")
+	// gog, err := inputs.GroupByBlankLines("day13/input_example.txt")
 	gog, err := inputs.GroupByBlankLines("day13/input1.txt")
 	if err != nil {
 		localLogger.Err(err).Msg("could not read input file")
