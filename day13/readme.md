@@ -116,6 +116,72 @@ Determine which pairs of packets are already in the right order. What is the sum
 
 ### Solution
 
+Hardest part here was coming up with a data store that allowed me to represent infinitely recursive data types.
+
+In the end I created an `item` interface that implemented three methods:
+* `Day13()`, which does nothing, but limits the implementations to this interface
+* `String() string` to return a string representation of the data we're looking at
+* `Type() int` which returns the concrete type of the implementation.
+
+There are also two iota constants to denote the type: `typeList` and `typeInteger`.
+
+The two concrete types are called `integer`, which is based on the built in `int`, and `list`, which is `[]item`. Note that here I'm using the `item` interface type, so a list can be made up of a bunch of `integers`, some `list`s, etc... This way I can nest it however I want.
+
+Next up was parsing the individual lines. The parser function returns a list, ie something that's wrapped in a `[]`, as every packet is a list.
+
+Then I go character by character:
+* is this a `[`? grab the rest of the string, including that char, and send it to the parser function, recursively, and grab the resulting `list` that comes out, and add it to the currently open `list`
+* is this a `]`? neat, we have a complete list, return the currently open list from the parser function. Also check whether we've been collecting numbers, and if we have, parse that, add that to the list, and then return
+* is this a `,`? cool, check if we've been collecting numbers, and if so, add that to the list. We've already added the preceding sub-list to the currently open list
+* is this an anything else? presumably a number. Add it to the `strings.Builder`
+
+That gives me a neat little data type that looks like this:
+```
+// [2,[[8],[9,0]],[1]]
+list{
+    integer(2),
+    list{
+        list{
+            integer(8)
+        },
+        list{
+            integer(9),
+            integer(0),
+        },
+    },
+    list{
+        integer(1),
+    },
+}
+```
+
+Next step is to compare the two. The comparison function is also a recursive one that compares two `list`s.
+
+* start by figuring out the lengths of the two lists and creating a fallback return, in case the contents of the list do not make a decision on whether it's in the correct order
+  * same length: fallback is "continue"
+  * left is shorter: fallback is "correct order"
+  * right is shorter: fallback is "incorrect order"
+* then start a for loop that goes from 0 to the length of the shorter of the two, and for each index
+  * checks the two types. (remember the `.Type() int` method on the interface?) There are four possibilities
+    * element from left is integer, elem from right is integer => compare ints
+      * left is smaller, return correct
+      * right is smaller, return incorrect
+      * they're the same, `continue` with the for loop
+    * elem from left is int, right is list
+      * convert left int into a list with a single int element
+      * send both the left as list, and right list to the compare function (recursion)
+      * check return value, if the value is continue, continue, otherwise return decision
+    * elem from left is list, right is list
+      * send both to the compare function (recursion)
+      * check value, if continue, continue, otherwise return decision
+    * elem from left is list, right is int
+      * convert right int to list
+      * send both lists to compare function (recursion)
+      * check value, if continue, continue, otherwise return decision
+
+At the end each group needs to return either correct / incorrect. If they returned continue once the full strings were parsed, that's an error and stop.
+
+Add the indices (starting from 1) to an accumulator where the decision was "correct order", and that's the solution.
 ## Part 2
 
 Now, you just need to put all of the packets in the right order. Disregard the blank lines in your list of received packets.
@@ -153,3 +219,11 @@ Afterward, locate the divider packets. To find the decoder key for this distress
 Organize all of the packets into the correct order. What is the decoder key for the distress signal?
 
 ### Solution
+
+* parse and comparison function are already done
+create a slice to hold all the parsed lists, parse all of them, and add them to the slice in whatever order
+* parse the 2 divider and 6 divider strings into lists, and add them to the slice with the others
+* do a `sort.Slice` passing in a `less` function that uses the comparison function between two `list`s to establish less / more relationship that the sorter can use
+* create an accumulator value with 1
+* iterate over the now sorted list, if the string representation of the item matches the 2 divider or 6 divider strings, multiply the accumulator by whatever the 1-based index of the current item is
+* that accumulator is the solution

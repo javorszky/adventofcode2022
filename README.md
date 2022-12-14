@@ -12,3 +12,4 @@
 * [day 10](day10) - for loops, registers, strings.Builder, keeping track of values
 * [day 11](day11) - channels, multi-tree, primes, normalization, and functional structs
 * [day 12](day12) - route finding and recursive functions!
+* [day 13](day13) - more recursion, sort implementation
