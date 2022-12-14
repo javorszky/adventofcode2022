@@ -135,6 +135,10 @@ func (r *rock) addRocks(lines []string) error {
 	return nil
 }
 
+func (r *rock) addSand(coord int) {
+	r.grid[coord] = matSand
+}
+
 func (r *rock) String() string {
 	var sb strings.Builder
 	draw := " "

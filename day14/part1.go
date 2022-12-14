@@ -4,6 +4,7 @@ import (
 	"os"
 
 	"github.com/javorszky/adventofcode2022/inputs"
+	"github.com/pkg/errors"
 	"github.com/rs/zerolog"
 )
 
@@ -25,7 +26,18 @@ func Task1(l zerolog.Logger) {
 
 	localLogger.Info().Msgf("The map:\n%s", r.String())
 
-	solution := 2
+	count := 0
+	for {
+		s := newSand(r.grid)
+		restCoord, err := s.findRestingPlace()
+		if errors.Is(err, errAbyss) {
+			break
+		}
+		r.addSand(restCoord)
+		count++
+	}
+
+	solution := count
 	s := localLogger.With().Int("solution", solution).Logger()
-	s.Info().Msgf("-- change this for the part 1 message -- %d", solution)
+	s.Info().Msgf("At the end %d units of sand came to rest before abyss", solution)
 }
