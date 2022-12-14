@@ -61,10 +61,11 @@ func binaryToXY(in int) (int, int) {
 func (r *rock) addRocks(lines []string) error {
 	minCol, minRow, maxCol, maxRow := 1<<32, 0, 0, 0
 	rocks := make([]int, 0)
+
 	for _, in := range lines {
-		fmt.Printf("adding line\n%s\n\n", in)
 		vertices := strings.Split(in, " -> ")
 		coordList := make([][2]int, len(vertices))
+
 		for i := 0; i < len(vertices); i++ {
 			pts := strings.Split(vertices[i], ",")
 			if len(pts) != 2 {
@@ -106,10 +107,8 @@ func (r *rock) addRocks(lines []string) error {
 			if err != nil {
 				return errors.Wrapf(err, "generating connectors for %v -> %v", coordList[0], coordList[1])
 			}
-			fmt.Printf(" -- connectors: %v\n", list)
 
 			for _, cc := range list {
-				fmt.Printf(" --x- adding rock to %d, %d\n", cc[0], cc[1])
 				rocks = append(rocks, xyToBinary(cc[0], cc[1]))
 			}
 		}
@@ -135,6 +134,101 @@ func (r *rock) addRocks(lines []string) error {
 	return nil
 }
 
+func (r *rock) addRocksPart2(lines []string) error {
+	minCol, minRow, maxCol, maxRow := 1<<32, 0, 0, 0
+	rocks := make([]int, 0)
+
+	for _, in := range lines {
+		vertices := strings.Split(in, " -> ")
+		coordList := make([][2]int, len(vertices))
+
+		for i := 0; i < len(vertices); i++ {
+			pts := strings.Split(vertices[i], ",")
+			if len(pts) != 2 {
+				return fmt.Errorf("parsing '%s' into pair of coords, is not 2 parts", vertices[i])
+			}
+
+			col, err := strconv.Atoi(pts[0])
+			if err != nil {
+				return errors.Wrapf(err, "converting %s col into int", pts[0])
+			}
+
+			row, err := strconv.Atoi(pts[1])
+			if err != nil {
+				return errors.Wrapf(err, "converting %s row into int", pts[1])
+			}
+
+			// expand map
+			if row < minRow {
+				minRow = row
+			}
+
+			if col < minCol {
+				minCol = col
+			}
+
+			if row > maxRow {
+				maxRow = row
+			}
+
+			if col > maxCol {
+				maxCol = col
+			}
+
+			coordList[i] = [2]int{row, col}
+		}
+
+		for i := 0; i < len(coordList)-1; i++ {
+			list, err := generateConnectors(coordList[i], coordList[i+1])
+			if err != nil {
+				return errors.Wrapf(err, "generating connectors for %v -> %v", coordList[0], coordList[1])
+			}
+
+			for _, cc := range list {
+				rocks = append(rocks, xyToBinary(cc[0], cc[1]))
+			}
+		}
+	}
+
+	// add rock floor
+	maxRow += 2
+	if 500-maxRow-2 < minCol {
+		minCol = 500 - maxRow - 2
+	}
+
+	if 500+maxRow+2 > maxCol {
+		maxCol = 500 + maxRow + 2
+	}
+
+	for row := minRow; row <= maxRow; row++ {
+		for col := minCol; col <= maxCol; col++ {
+			r.grid[xyToBinary(row, col)] = matAir
+		}
+	}
+
+	for _, pebble := range rocks {
+		r.grid[pebble] = matRock
+	}
+
+	r.grid[xyToBinary(0, 500)] = matEntry
+
+	floor, err := generateConnectors([2]int{maxRow, minCol}, [2]int{maxRow, maxCol})
+	if err != nil {
+		return errors.Wrapf(err, "generating floor")
+	}
+
+	for _, f := range floor {
+		r.grid[xyToBinary(f[0], f[1])] = matRock
+	}
+
+	r.minRow = minRow
+	r.maxRow = maxRow
+	r.minCol = minCol
+	r.maxCol = maxCol
+
+	return nil
+}
+
 func (r *rock) addSand(coord int) {
 	r.grid[coord] = matSand
 }
@@ -151,7 +245,7 @@ func (r *rock) String() string {
 			case matRock:
 				draw = "#"
 			case matSand:
-				draw = "~"
+				draw = "o"
 			case matEntry:
 				draw = "+"
 			default:
