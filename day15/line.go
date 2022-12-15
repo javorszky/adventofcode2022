@@ -1,9 +1,11 @@
 package day15
 
 import (
+	"fmt"
 	"sort"
 
 	"github.com/pkg/errors"
+	"github.com/rs/zerolog"
 )
 
 const (
@@ -159,7 +161,6 @@ func mergeLines(a, b line) (line, error) {
 }
 
 func reduceLines(ls lines) (lines, error) {
-
 	for {
 		sort.Sort(ls)
 
@@ -190,4 +191,141 @@ func reduceLines(ls lines) (lines, error) {
 	}
 
 	return ls, nil
+}
+
+func cutLines(origin line, cutSet lines, l zerolog.Logger) (lines, error) {
+	originalParts := lines{origin}
+	filteredCutset := make(lines, 0)
+
+	for _, cs := range cutSet {
+		if cs.orientation == origin.orientation && cs.rowCol == origin.rowCol {
+			filteredCutset = append(filteredCutset, cs)
+		}
+	}
+
+	// if len(filteredCutset) == 0 {
+	// 	l.Debug().Msgf("filtered cutset is zero")
+	// 	return originalParts, nil
+	// }
+
+	l.Debug().Msgf("filtered cutset is %v", filteredCutset)
+
+	idx := 0
+	if origin.orientation == lineVertical {
+		l.Debug().Msgf("lines are vertical (y (idx 1) moves, x (idx 0) stationary)")
+		idx = 1
+	}
+
+	allNewParts := make(lines, 0)
+	newParts := originalParts
+
+	for _, fc := range filteredCutset {
+
+		for _, op := range newParts {
+			ops, ope, fcs, fce := op.start[idx], op.end[idx], fc.start[idx], fc.end[idx]
+
+			l.Debug().Msgf("Op %d -> %d, FC %d -> %d", ops, ope, fcs, fce)
+
+			switch {
+			case ope < fcs || ops > fce:
+				l.Debug().Msgf("do not overlap, op is added back")
+				// do not overlap, continue
+				// Fs--Fe ... OPs--OPe
+				// OPs--OPe ... Fs--Fe
+				// ... do nothing
+				// add op back to the new parts unchanged
+				newParts = append(newParts, op)
+
+			case fcs <= ops && fce >= ope:
+				// cutset envelops, op disappears
+				// Fs--OPs--OPe--Fe
+				// ... remove op from slice
+				// do not add op to the new parts
+				l.Debug().Msgf("cutset envelops, op disappears")
+
+			case ops < fcs && fce < ope:
+				l.Debug().Msgf("cutset contained, op broken into two")
+				// cutset contained, op broken into two
+				// OPs--Fs--Fe--OPe
+				// OPs--Fs-1 ... Fe+1--OPe
+				if origin.orientation == lineHorizontal {
+					ls, err := newLine(coordinate{ops, origin.rowCol}, coordinate{fcs - 1, origin.rowCol})
+					if err != nil {
+						return nil, errors.Wrapf(err, "cutset contained, left new line, op broken into two. OP %v, FC %v", op, fc)
+					}
+
+					le, err := newLine(coordinate{fce + 1, origin.rowCol}, coordinate{ope, origin.rowCol})
+					if err != nil {
+						return nil, errors.Wrapf(err, "cutset contained, right new line, op broken into two. OP %v, FC %v", op, fc)
+					}
+
+					newParts = append(newParts, ls, le)
+					continue
+				}
+
+				ls, err := newLine(coordinate{origin.rowCol, ops}, coordinate{origin.rowCol, fcs - 1})
+				if err != nil {
+					return nil, errors.Wrapf(err, "cutset contained, top new line, op broken into two. OP %v, FC %v", op, fc)
+				}
+
+				le, err := newLine(coordinate{origin.rowCol, fce + 1}, coordinate{origin.rowCol, ope})
+				if err != nil {
+					return nil, errors.Wrapf(err, "cutset contained, bottom new line, op broken into two. OP %v, FC %v", op, fc)
+				}
+
+				newParts = append(newParts, ls, le)
+
+			case fcs <= ops && fce < ope:
+				l.Debug().Msgf("cutset overlaps on left")
+				// cutset overlaps on left
+				// Fs--OPs-Fe---OPe
+				// Fe+1--OPe
+				if origin.orientation == lineHorizontal {
+					lr, err := newLine(coordinate{fce + 1, origin.rowCol}, coordinate{ope, origin.rowCol})
+					if err != nil {
+						return nil, errors.Wrapf(err, "cutset overlaps on left. OP %v, FC %v", op, fc)
+					}
+					newParts = append(newParts, lr)
+					continue
+				}
+
+				lr, err := newLine(coordinate{origin.rowCol, fce + 1}, coordinate{origin.rowCol, ope})
+				if err != nil {
+					return nil, errors.Wrapf(err, "cutset overlaps on top. OP %v, FC %v", op, fc)
+				}
+				newParts = append(newParts, lr)
+			case ops < fcs && ope <= fce:
+				l.Debug().Msgf("cutset overlaps on right")
+				// cutset overlaps on right
+				// OPs--Fs-OPe--Fe
+				// OPs--Fs-1
+				if origin.orientation == lineHorizontal {
+					ll, err := newLine(coordinate{ops, origin.rowCol}, coordinate{fcs - 1, origin.rowCol})
+					if err != nil {
+						return nil, errors.Wrapf(err, "cutset overlaps on right, OP %v, FC %v", op, fc)
+					}
+					newParts = append(newParts, ll)
+					continue
+				}
+
+				ll, err := newLine(coordinate{origin.rowCol, ops}, coordinate{origin.rowCol, fcs - 1})
+				if err != nil {
+					return nil, errors.Wrapf(err, "cutset overlaps on top, OP %v, FC %v", op, fc)
+				}
+				newParts = append(newParts, ll)
+			default:
+				return nil, fmt.Errorf("none of the above matched for op %v and fc %v", op, fc)
+			}
+		}
+
+	}
+
+	allNewParts = append(allNewParts, newParts...)
+
+	m, err := reduceLines(allNewParts)
+	if err != nil {
+		return nil, errors.Wrapf(err, "tried to merge allnewparts: %v", allNewParts)
+	}
+
+	return m, nil
 }
