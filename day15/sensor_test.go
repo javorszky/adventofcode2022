@@ -89,16 +89,16 @@ func Test_sensor_rowBoundCoordinates(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, got1, err := s.rowBoundCoordinates(tt.row)
+			got, got1, err := s.lineForRow(tt.row)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("rowBoundCoordinates() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("lineForRow() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("rowBoundCoordinates() got = %v, want %v", got, tt.want)
+				t.Errorf("lineForRow() got = %v, want %v", got, tt.want)
 			}
 			if !reflect.DeepEqual(got1, tt.want1) {
-				t.Errorf("rowBoundCoordinates() got1 = %v, want %v", got1, tt.want1)
+				t.Errorf("lineForRow() got1 = %v, want %v", got1, tt.want1)
 			}
 		})
 	}
@@ -487,6 +487,330 @@ func Test_mergeLines(t *testing.T) {
 			}
 			if !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("mergeLines() got = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func Test_pluck(t *testing.T) {
+	type args[T any] struct {
+		sl  []T
+		idx int
+	}
+	type testCase[T any] struct {
+		name    string
+		args    args[T]
+		want    T
+		want1   []T
+		wantErr bool
+	}
+	tests := []testCase[int]{
+		{
+			name: "fails to pluck int from slice",
+			args: args[int]{
+				sl:  []int{0, 1, 2, 3, 4, 5, 6},
+				idx: 7,
+			},
+			want:    0,
+			want1:   nil,
+			wantErr: true,
+		},
+		{
+			name: "plucks int from slice",
+			args: args[int]{
+				sl:  []int{0, 1, 2, 3, 4, 5, 6},
+				idx: 3,
+			},
+			want:    3,
+			want1:   []int{0, 1, 2, 4, 5, 6},
+			wantErr: false,
+		},
+		{
+			name: "plucks int from end of slice",
+			args: args[int]{
+				sl:  []int{0, 1, 2, 3, 4, 5, 6},
+				idx: 6,
+			},
+			want:    6,
+			want1:   []int{0, 1, 2, 3, 4, 5},
+			wantErr: false,
+		},
+		{
+			name: "plucks int from beginning of slice",
+			args: args[int]{
+				sl:  []int{0, 1, 2, 3, 4, 5, 6},
+				idx: 0,
+			},
+			want:    0,
+			want1:   []int{1, 2, 3, 4, 5, 6},
+			wantErr: false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, got1, err := pluck(tt.args.sl, tt.args.idx)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("pluck() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("pluck() got = %v, want %v", got, tt.want)
+			}
+			if !reflect.DeepEqual(got1, tt.want1) {
+				t.Errorf("pluck() got1 = %v, want %v", got1, tt.want1)
+			}
+		})
+	}
+}
+
+func Test_reduceLines(t *testing.T) {
+	type args struct {
+		lines []line
+	}
+	tests := []struct {
+		name    string
+		args    args
+		want    []line
+		wantErr bool
+	}{
+		{
+			name: "merges the two lines together",
+			args: args{
+				lines: []line{
+					{
+						start:       coordinate{0, 6},
+						end:         coordinate{10, 6},
+						orientation: lineHorizontal,
+						rowCol:      6,
+					},
+					{
+						start:       coordinate{4, 6},
+						end:         coordinate{12, 6},
+						orientation: lineHorizontal,
+						rowCol:      6,
+					},
+				},
+			},
+			want: []line{
+				{
+					start:       coordinate{0, 6},
+					end:         coordinate{12, 6},
+					orientation: lineHorizontal,
+					rowCol:      6,
+				},
+			},
+			wantErr: false,
+		},
+		{
+			name: "merges the two of the three lines together",
+			args: args{
+				lines: []line{
+					{
+						start:       coordinate{-10, 6},
+						end:         coordinate{-5, 6},
+						orientation: lineHorizontal,
+						rowCol:      6,
+					},
+					{
+						start:       coordinate{0, 6},
+						end:         coordinate{10, 6},
+						orientation: lineHorizontal,
+						rowCol:      6,
+					},
+					{
+						start:       coordinate{4, 6},
+						end:         coordinate{12, 6},
+						orientation: lineHorizontal,
+						rowCol:      6,
+					},
+				},
+			},
+			want: []line{
+				{
+					start:       coordinate{-10, 6},
+					end:         coordinate{-5, 6},
+					orientation: lineHorizontal,
+					rowCol:      6,
+				},
+				{
+					start:       coordinate{0, 6},
+					end:         coordinate{12, 6},
+					orientation: lineHorizontal,
+					rowCol:      6,
+				},
+			},
+			wantErr: false,
+		},
+		{
+			name: "merges the two of the three lines together, weird order",
+			args: args{
+				lines: []line{
+					{
+						start:       coordinate{4, 6},
+						end:         coordinate{12, 6},
+						orientation: lineHorizontal,
+						rowCol:      6,
+					},
+					{
+						start:       coordinate{-10, 6},
+						end:         coordinate{-5, 6},
+						orientation: lineHorizontal,
+						rowCol:      6,
+					},
+					{
+						start:       coordinate{0, 6},
+						end:         coordinate{10, 6},
+						orientation: lineHorizontal,
+						rowCol:      6,
+					},
+				},
+			},
+			want: []line{
+				{
+					start:       coordinate{-10, 6},
+					end:         coordinate{-5, 6},
+					orientation: lineHorizontal,
+					rowCol:      6,
+				},
+				{
+					start:       coordinate{0, 6},
+					end:         coordinate{12, 6},
+					orientation: lineHorizontal,
+					rowCol:      6,
+				},
+			},
+			wantErr: false,
+		},
+		{
+			name: "merges the three of the three lines together, weird order",
+			args: args{
+				lines: []line{
+					{
+						start:       coordinate{4, 6},
+						end:         coordinate{12, 6},
+						orientation: lineHorizontal,
+						rowCol:      6,
+					},
+					{
+						start:       coordinate{-10, 6},
+						end:         coordinate{4, 6},
+						orientation: lineHorizontal,
+						rowCol:      6,
+					},
+					{
+						start:       coordinate{0, 6},
+						end:         coordinate{10, 6},
+						orientation: lineHorizontal,
+						rowCol:      6,
+					},
+				},
+			},
+			want: []line{
+				{
+					start:       coordinate{-10, 6},
+					end:         coordinate{12, 6},
+					orientation: lineHorizontal,
+					rowCol:      6,
+				},
+			},
+			wantErr: false,
+		},
+
+		{
+			name: "merges two groups together, weird order",
+			args: args{
+				lines: []line{
+					{
+						start:       coordinate{4, 6},
+						end:         coordinate{12, 6},
+						orientation: lineHorizontal,
+						rowCol:      6,
+					},
+					{
+						start:       coordinate{-10, 6},
+						end:         coordinate{4, 6},
+						orientation: lineHorizontal,
+						rowCol:      6,
+					},
+					{
+						start:       coordinate{3, 0},
+						end:         coordinate{3, 6},
+						orientation: lineVertical,
+						rowCol:      3,
+					},
+					{
+						start:       coordinate{3, 4},
+						end:         coordinate{3, 10},
+						orientation: lineVertical,
+						rowCol:      3,
+					},
+				},
+			},
+			want: []line{
+				{
+					start:       coordinate{-10, 6},
+					end:         coordinate{12, 6},
+					orientation: lineHorizontal,
+					rowCol:      6,
+				},
+				{
+					start:       coordinate{3, 0},
+					end:         coordinate{3, 10},
+					orientation: lineVertical,
+					rowCol:      3,
+				},
+			},
+			wantErr: false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := reduceLines(tt.args.lines)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("reduceLines() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("reduceLines() got = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func Test_line_Len(t *testing.T) {
+	type fields struct {
+		start coordinate
+		end   coordinate
+	}
+	tests := []struct {
+		name   string
+		fields fields
+		want   int
+	}{
+		{
+			name: "point",
+			fields: fields{
+				start: coordinate{0, 0},
+				end:   coordinate{0, 0},
+			},
+			want: 1,
+		},
+		{name: "4 long",
+			fields: fields{
+				start: coordinate{0, 4},
+				end:   coordinate{0, 7},
+			},
+			want: 4,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			l, err := newLine(tt.fields.start, tt.fields.end)
+			if err != nil {
+				t.Errorf("newline didn't work: %s", err.Error())
+			}
+			if got := l.Len(); got != tt.want {
+				t.Errorf("Len() = %v, want %v", got, tt.want)
 			}
 		})
 	}

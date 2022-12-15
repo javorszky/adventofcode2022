@@ -2,6 +2,7 @@ package day15
 
 import (
 	"fmt"
+	"sort"
 
 	"github.com/pkg/errors"
 )
@@ -31,25 +32,39 @@ func (s sensor) rowInExclusion(row int) bool {
 	return s.self[1]-s.manhattanDistance <= row && row <= s.self[1]+s.manhattanDistance
 }
 
-func (s sensor) rowBoundCoordinates(row int) (coordinate, coordinate, error) {
+func (s sensor) lineForRow(row int) (line, error) {
 	if !s.rowInExclusion(row) {
-		return coordinate{}, coordinate{}, fmt.Errorf("row %d is not in exclusion zone for this sensor", row)
+		return line{}, fmt.Errorf("row %d is not in exclusion zone for this sensor", row)
 	}
 
 	d := s.manhattanDistance - absDiff(row, s.self[1])
+	a, b := coordinate{s.self[0] - d, row}, coordinate{s.self[0] + d, row}
 
-	return coordinate{s.self[0] - d, row}, coordinate{s.self[0] + d, row}, nil
+	l, err := newLine(a, b)
+	if err != nil {
+		return line{}, errors.Wrapf(err, "creating line for %v, %v", a, b)
+	}
+
+	if a == b && l.orientation == lineVertical {
+		l.orientation = lineHorizontal
+	}
+
+	if l.orientation == lineVertical {
+		return line{}, fmt.Errorf("line is vertical for row %d: bounds %v, %v", row, a, b)
+	}
+
+	return l, nil
 }
 
 type grid struct {
 	sensors []sensor
 }
 
-func (g grid) addSensor(s sensor) {
+func (g *grid) addSensor(s sensor) {
 	g.sensors = append(g.sensors, s)
 }
 
-func (g grid) sensorsExcludingRow(row int) []sensor {
+func (g *grid) sensorsExcludingRow(row int) []sensor {
 	listOfSensors := make([]sensor, 0)
 
 	for _, s := range g.sensors {
@@ -65,6 +80,13 @@ type line struct {
 	start, end  coordinate
 	orientation orientation
 	rowCol      int
+}
+
+func (l line) Len() int {
+	if l.orientation == lineVertical {
+		return l.end[1] - l.start[1] + 1
+	}
+	return l.end[0] - l.start[0] + 1
 }
 
 // newLine creates a new line defined by two coordinates. It has to be either vertical or horizontal,
@@ -158,6 +180,52 @@ func mergeLines(a, b line) (line, error) {
 		orientation: a.orientation,
 		rowCol:      a.rowCol,
 	}, nil
+}
+
+func reduceLines(lines []line) ([]line, error) {
+	sort.Slice(lines, func(i, j int) bool {
+		if lines[i].orientation != lines[j].orientation {
+			return lines[i].orientation < lines[j].orientation
+		}
+
+		if lines[i].orientation == lineVertical {
+			return lines[i].start[1] < lines[j].start[1]
+		}
+
+		return lines[i].start[0] < lines[j].start[0]
+	})
+
+	i := 0
+	for {
+		if len(lines)-1 <= i {
+			break
+		}
+		a := lines[i]
+		b := lines[i+1]
+
+		m, err := mergeLines(a, b)
+		if err != nil {
+			// do not change the slice, move on to the next one
+			i++
+			continue
+		}
+		// m is now a and b merged
+		lines[i] = m
+		_, lines, err = pluck(lines, i+1)
+	}
+
+	return lines, nil
+}
+
+func pluck[T any](sl []T, idx int) (T, []T, error) {
+	var thing T
+	if idx >= len(sl) {
+		return thing, nil, errors.New("index out of bounds")
+	}
+
+	thing = sl[idx]
+	ls := append(sl[:idx], sl[idx+1:]...)
+	return thing, ls, nil
 }
 
 func newSensor(own, closest coordinate) sensor {
