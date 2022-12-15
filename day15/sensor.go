@@ -2,7 +2,17 @@ package day15
 
 import (
 	"fmt"
+
+	"github.com/pkg/errors"
 )
+
+const (
+	lineAngled orientation = iota
+	lineHorizontal
+	lineVertical
+)
+
+type orientation int
 
 // coordinate holds a pair of ints, in col / row format.
 // x, y =>
@@ -49,6 +59,105 @@ func (g grid) sensorsExcludingRow(row int) []sensor {
 	}
 
 	return listOfSensors
+}
+
+type line struct {
+	start, end  coordinate
+	orientation orientation
+	rowCol      int
+}
+
+// newLine creates a new line defined by two coordinates. It has to be either vertical or horizontal,
+// which means either the first or second coordinates NEED to match.
+func newLine(a, b coordinate) (line, error) {
+	if a[0] != b[0] && a[1] != b[1] {
+		return line{}, errors.New("the two points do not make for a horizontal or vertical line")
+	}
+
+	start := a
+	end := b
+
+	if a[0] == b[0] {
+		// vertical
+		if start[1] > end[1] {
+			start, end = end, start
+		}
+
+		return line{
+			start:       start,
+			end:         end,
+			orientation: lineVertical,
+			rowCol:      a[0],
+		}, nil
+	}
+
+	// horizontal
+	if start[0] > end[0] {
+		start, end = end, start
+	}
+
+	return line{
+		start:       start,
+		end:         end,
+		orientation: lineHorizontal,
+		rowCol:      a[1],
+	}, nil
+}
+
+func mergeLines(a, b line) (line, error) {
+	if a.orientation != b.orientation {
+		return line{}, errors.New("lines are different orientation")
+	}
+
+	if a.rowCol != b.rowCol {
+		return line{}, errors.New("lines are on different planes")
+	}
+
+	if a.orientation == lineHorizontal {
+		// horizontal, meaning [1] will stay the same
+		if a.start[0] > b.start[0] {
+			a, b = b, a
+		}
+
+		if b.start[0]-a.end[0] > 1 {
+			// too far apart, can't merge
+			return line{}, errors.New("don't touch, can't merge")
+		}
+
+		end := b.end
+		if a.end[0] > end[0] {
+			end = a.end
+		}
+
+		return line{
+			start:       a.start,
+			end:         end,
+			orientation: a.orientation,
+			rowCol:      a.rowCol,
+		}, nil
+	}
+
+	// vertical, meaning [0] will stay the same
+	if a.start[1] > b.start[1] {
+		a, b = b, a
+	}
+
+	if b.start[1]-a.end[1] > 1 {
+		// too far apart, can't merge
+		return line{}, errors.New("don't touch, can't merge")
+	}
+
+	end := b.end
+	if a.end[1] > end[1] {
+		end = a.end
+	}
+
+	return line{
+		start:       a.start,
+		end:         end,
+		orientation: a.orientation,
+		rowCol:      a.rowCol,
+	}, nil
 }
 
 func newSensor(own, closest coordinate) sensor {
