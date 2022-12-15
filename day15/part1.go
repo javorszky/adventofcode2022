@@ -38,6 +38,10 @@ func Task1(l zerolog.Logger) {
 	s.Info().Msgf("-- change this for the part 1 message -- %d", solution)
 }
 
+// parseLine takes a line of input, and turns that into a sensor - beacon pair.
+// x is row
+// y is column
+//
 // Sensor at x=3056788, y=2626224: closest beacon is at x=3355914, y=2862466
 func parseLine(line string) (sensor, error) {
 	matches := reInput.FindStringSubmatch(line)

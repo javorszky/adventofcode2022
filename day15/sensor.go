@@ -1,12 +1,20 @@
 package day15
 
-// coordinate holds a pair of ints, in row / col format.
+// coordinate holds a pair of ints, in col / row format.
+// x, y =>
+//
+//	x is column, horizontal, right is plus
+//	y is row, vertical, down is plus
 type coordinate [2]int
 
 type sensor struct {
 	self              coordinate
 	closestBeacon     coordinate
 	manhattanDistance int
+}
+
+func (s sensor) rowInExclusion(row int) bool {
+	return s.self[1]-s.manhattanDistance <= row && row <= s.self[1]+s.manhattanDistance
 }
 
 type grid struct {
