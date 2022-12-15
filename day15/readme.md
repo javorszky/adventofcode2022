@@ -106,6 +106,66 @@ Consult the report from the sensors you just deployed. In the row where `y=20000
 
 ### Solution
 
+#### 1. create representations of different things
+* coordinate:
+  * it's a [2]int that holds x (left-to-right) and y (up-and-down) coordinates
+* line
+  * two coordinates for endpoints
+  * a flag to denote whether it's vertical or horizontal
+  * the plane it's on: which row or column it is
+  * a constructor that takes in two coordinates, and
+    * checks that they're in the same row / column
+    * sets the horizontal/vertical flag appropriately
+    * orders the two points, so the smaller (more to the left, more to the top) are always first
+* lines
+  * is a slice of line which we can attach methods to
+* sensor
+  * coordinate for itself
+  * coordinate for the nearest beacon
+  * manhattan distance between it and the beacon
+  * constructor that takes to coordinates, one for itself, one for the beacon
+* the grid
+  * slice to hold the sensors present
+
+#### 2. add helper functions
+
+* `absDiff` to help calculating the manhattan distance. It takes two ints, no matter the order passed in, it will be a positive distance between them
+* `manhattanDistance`: using absdiff, takes two coordinates, spits out an int
+* `uniqueCoordinates`: given a list of coordinates, remove duplicates
+* `pluck` generic function, takes in a slice of anything and an index, returns the thing at index, the slice without the thing in it, and optionally an error if something went wrong. For example: [0,1,2,3], you pluck that with index 2, you get 2 (the number at index 2), and [0,1,3] as result
+* `mergeLines`: takes two lines, tries to merge them. If successful, returns the single merged line, if not, returns error
+* `reduceLines`: takes a slice of lines, and merges them together as much as it can, until no more merges can happen
+#### 3. add methods to things
+* grid
+  * addSensor: takes a sensor, adds it to the list
+  * sensorExcludingRow: essentially a filter function, returns a list of sensors that have an exclusion zone that touches the given zone
+  * sensorsBeaconsOnRow: filter function, returns a list of sensors that have either the sensor itself, or its beacon on that specific row, ignoring its exclusion zone. Just the device itself
+* line, singular
+  * Len(): returns the length of the line from start to end, including
+  * isCoordInLine: returns whether a given coordinate falls on the line
+* lines
+  * implements the `sort.Interface` interface, so we can use `sort.Sort(lines)` on it. Sort order:
+    * horizontals go before verticals
+    * within equal values of horizontal, starts on left goes first
+    * within equal values of vertical, starts on top goes first
+* sensor
+  * `rowInExclusion`: whether the given row touches the exclusion zone of the sensor
+  * `lineForRow`: the horizontal slice of the exclusion zone on the given row
+
+#### 4. the methodology
+
+1. parse input into sensor/beacon pairs
+2. populate grid
+3. grab all sensors that are on the row we're looking at
+4. grab all the lines from all the sensors for the row we're looking at
+5. reduce those lines (merge them together) so there's no overlap, to guard from double counting
+6. grab all the sensors and beacons for the row
+7. filter the coordinates of sensors and beacons to be unique
+8. filter the coordinates of sensors and beacons by checking them against all the lines, if they aren't on any of the lines, discard them
+9. sum up the line lengths
+10. subtract the number of beacons / sensors from the sum
+11. that is the solution
+
 ## Part 2
 
 Your handheld device indicates that the distress signal is coming from a beacon nearby. The distress beacon is not detected by any sensor, but the distress beacon must have x and y coordinates each no lower than 0 and no larger than 4000000.
@@ -117,3 +177,18 @@ In the example above, the search space is smaller: instead, the x and y coordina
 Find the only possible position for the distress beacon. What is its tuning frequency?
 
 ### Solution
+
+Same as above, except we're introducing a `clip`: that is used to have an upper and lower bound of the lines being returned for the slices of exclusion zones.
+
+#### Methodology
+
+* for each row from 0 to 4,000,000:
+  * grab all sensors that touch that row
+  * grab the clipped lines from the sensors
+  * merge those together
+  * ignore sensors / beacon coordinates 
+  * check the length, compare to the full width
+  * if the width is less than the full width of the 4,000,000
+  * print out the merged lines
+  * manually count the product we're looking for
+  * that's the solution

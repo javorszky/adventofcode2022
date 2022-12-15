@@ -14,3 +14,4 @@
 * [day 12](day12) - route finding and recursive functions!
 * [day 13](day13) - more recursion, sort implementation
 * [day 14](day14) - map, movement, grid, nothing special
+* [day 15](day15) - oof, lots of calcualtions, but mostly lines, slices, sorts, reduces, maps
