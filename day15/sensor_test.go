@@ -48,57 +48,64 @@ func Test_sensor_rowInExclusion(t *testing.T) {
 	}
 }
 
-func Test_sensor_rowBoundCoordinates(t *testing.T) {
+func Test_sensor_rowBoundLine(t *testing.T) {
 	s := newSensor(coordinate{10, 10}, coordinate{12, 12})
 
 	tests := []struct {
 		name    string
 		row     int
-		want    coordinate
-		want1   coordinate
+		want    line
 		wantErr bool
 	}{
 		{
-			name:    "row goes through sensor",
-			row:     10,
-			want:    coordinate{6, 10},
-			want1:   coordinate{14, 10},
+			name: "row goes through sensor",
+			row:  10,
+			want: line{
+				start:       coordinate{6, 10},
+				end:         coordinate{14, 10},
+				orientation: lineHorizontal,
+				rowCol:      10,
+			},
 			wantErr: false,
 		},
 		{
-			name:    "row is top tip",
-			row:     6,
-			want:    coordinate{10, 6},
-			want1:   coordinate{10, 6},
+			name: "row is top tip",
+			row:  6,
+			want: line{
+				start:       coordinate{10, 6},
+				end:         coordinate{10, 6},
+				orientation: lineHorizontal,
+				rowCol:      6,
+			},
 			wantErr: false,
 		},
 		{
-			name:    "row is somewhere in the middle",
-			row:     8,
-			want:    coordinate{8, 8},
-			want1:   coordinate{12, 8},
+			name: "row is somewhere in the middle",
+			row:  8,
+			want: line{
+				start:       coordinate{8, 8},
+				end:         coordinate{12, 8},
+				orientation: lineHorizontal,
+				rowCol:      8,
+			},
 			wantErr: false,
 		},
 		{
 			name:    "row does not intersect",
 			row:     0,
-			want:    coordinate{},
-			want1:   coordinate{},
+			want:    line{},
 			wantErr: true,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, got1, err := s.lineForRow(tt.row)
+			got, err := s.lineForRow(tt.row)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("lineForRow() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("lineForRow() got = %v, want %v", got, tt.want)
-			}
-			if !reflect.DeepEqual(got1, tt.want1) {
-				t.Errorf("lineForRow() got1 = %v, want %v", got1, tt.want1)
 			}
 		})
 	}

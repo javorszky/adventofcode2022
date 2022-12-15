@@ -11,14 +11,14 @@ import (
 	"github.com/rs/zerolog"
 )
 
-const lineToCheck = 10
+const lineToCheck = 2000000
 
 var reInput = regexp.MustCompile(`^Sensor at x=(-?\d+), y=(-?\d+): closest beacon is at x=(-?\d+), y=(-?\d+)$`)
 
 func Task1(l zerolog.Logger) {
 	localLogger := l.With().Int("day", 15).Int("part", 1).Logger()
 
-	gog, err := inputs.ReadIntoLines("day15/input_example.txt")
+	gog, err := inputs.ReadIntoLines("day15/input1.txt")
 	if err != nil {
 		localLogger.Err(err).Msg("could not read input file")
 		os.Exit(1)
@@ -43,7 +43,7 @@ func Task1(l zerolog.Logger) {
 		localLogger.Debug().Msgf("\n\nsensor%v", sensorForRow)
 		l, err := sensorForRow.lineForRow(lineToCheck)
 		if err != nil {
-			localLogger.Err(err).Msgf("grabbing bound line for row d", lineToCheck)
+			localLogger.Err(err).Msgf("grabbing bound line for row %d", lineToCheck)
 			os.Exit(1)
 		}
 
@@ -60,9 +60,18 @@ func Task1(l zerolog.Logger) {
 	}
 	localLogger.Debug().Msgf("after merge: %v", merged)
 
+	stuffCoordinates := g.sensorsBeaconsOnRow(lineToCheck)
+	uniqueCoords := uniqueCoordinates(stuffCoordinates)
+
 	n := 0
 	for _, m := range merged {
-		n += m.Len()
+		minus := 0
+		for _, uc := range uniqueCoords {
+			if m.isCoordInLine(uc) {
+				minus++
+			}
+		}
+		n += m.Len() - minus
 	}
 
 	solution := n
